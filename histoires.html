@@ -84,12 +84,14 @@ async function generate(){
   main.innerHTML=`<div class="loading"><div class="book"><i></i><i></i><i></i></div><h2>J'écris ton histoire…</h2><p class="sub">Cela prend environ 20 secondes.</p></div>`;
   try{
     const {data,error}=await SB.functions.invoke('story',{body:{child:SLUG,params:ANS}});
-    if(error||!data||data.error)throw new Error((data&&data.error)||'erreur');
+    if(error){let d='';try{const b=await error.context.json();d=[b.error,b.detail,b.message].filter(Boolean).join(' : ');}catch(_){d=error.message||'';}throw new Error(d||'erreur');}
+    if(!data||data.error)throw new Error([data&&data.error,data&&data.detail].filter(Boolean).join(' : ')||'erreur');
     STORY=data;
     const {data:ins}=await SB.from('stories').insert({child_id:KID.id,params:ANS,title:data.title,pages:data.pages,glossary:data.glossary,questions:data.questions}).select('id').single();
     STORY_ID=ins?ins.id:null;PAGE=0;ACTIVE_MS=0;read();
   }catch(e){
     main.innerHTML=`<div class="card"><h2>Oups, l'histoire n'a pas pu être écrite.</h2><p>Vérifie la connexion internet, puis réessaie. Si ça recommence, demande à Papa de regarder le guide (étape 4 : fonction « story »).</p>
+     <p class="sub" style="font-size:13px;opacity:.7">Détail pour Papa : ${String(e.message||e).replace(/[<>&]/g,'')}</p>
      <div class="row"><button class="btn mo" id="re">Réessayer</button><button class="btn ghost" id="bk">Retour</button></div></div>`;
     $('#re').onclick=generate;$('#bk').onclick=start;
   }
