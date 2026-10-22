@@ -163,6 +163,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%
 :root{--mo:#3F6FD8;--mo-soft:#DCE6FB}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--mo:#86A8FF;--mo-soft:#1E2A47}}
 :root[data-theme="dark"]{--mo:#86A8FF;--mo-soft:#1E2A47}
+:root{--en:#8A4FD0;--en-soft:#EEE3FB}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--en:#B98CF0;--en-soft:#2C2140}}
+:root[data-theme="dark"]{--en:#B98CF0;--en-soft:#2C2140}
+.en .glyph{background:var(--en-soft);color:var(--en)} .en .atelier-head h2{color:var(--en)}
+.enbtn{margin-top:10px;font:inherit;font-weight:600;font-size:15px;padding:8px 14px;border-radius:999px;border:2px solid var(--en);background:var(--en-soft);color:var(--ink);cursor:pointer}
 .mo .glyph{background:var(--mo-soft);color:var(--mo)} .mo .atelier-head h2{color:var(--mo)}
 .sqw{display:inline-block;transform-origin:50% 92%;animation:breathe 2.8s ease-in-out infinite;cursor:pointer;line-height:0}
 .sqw svg{display:block;width:100%;height:auto;overflow:visible}
@@ -1172,6 +1177,72 @@ const MEMO={
  cartes:`<h3>Lire une carte</h3><ul><li>Le <b>nord</b> est en haut, le <b>sud</b> en bas, l'<b>ouest</b> à gauche, l'<b>est</b> à droite.</li><li>4 grands fleuves : <b>Loire</b> (Atlantique), <b>Seine</b> (Manche), <b>Rhône</b> (Méditerranée), <b>Garonne</b> (Atlantique)</li><li>Montagnes : Alpes et Jura à l'est, Pyrénées au sud-ouest, Vosges au nord-est, Massif central au centre</li><li>6 continents · 5 océans : Pacifique, Atlantique, Indien, Arctique, Austral</li></ul>`,
  geo:`<h3>Le rappel</h3><ul><li>Fleuves : Loire (le plus long), Seine (Paris), Rhône (Méditerranée), Garonne</li><li>Montagnes : Alpes (mont Blanc), Pyrénées, Massif central, Jura, Vosges</li><li>Mers : Atlantique à l'ouest, Méditerranée au sud, Manche au nord</li><li>13 régions · 27 pays dans l'Union européenne · 6 continents</li></ul>`
 };
+/* ============ ANGLAIS (CM2) ============ */
+// [question, bonne réponse, [pièges], explication, mot ou phrase à écouter en anglais]
+const EN=[
+ ["Comment dit-on « rouge » en anglais ?","red",["blue","green","yellow"],"<b>Red</b> = rouge. Blue = bleu, green = vert, yellow = jaune.","red"],
+ ["Que veut dire « purple » ?","violet",["rose","marron","gris"],"<b>Purple</b> = violet. Pink = rose, brown = marron, grey = gris.","purple"],
+ ["Comment dit-on « quinze » ?","fifteen",["fifty","five","fourteen"],"<b>Fifteen</b> = 15. Attention : fifty = 50, five = 5, fourteen = 14.","fifteen"],
+ ["Combien font « twenty + thirty » ?","fifty",["forty","sixty","twenty-three"],"20 + 30 = 50 = <b>fifty</b>.","twenty plus thirty"],
+ ["Comment écrit-on 100 en anglais ?","one hundred",["one thousand","ten","one million"],"100 = <b>one hundred</b>. 1 000 = one thousand.","one hundred"],
+ ["Quel jour vient après « Monday » ?","Tuesday",["Thursday","Sunday","Friday"],"Monday (lundi) → <b>Tuesday</b> (mardi) → Wednesday → Thursday → Friday → Saturday → Sunday.","Monday, Tuesday"],
+ ["Que veut dire « Saturday » ?","samedi",["dimanche","vendredi","jeudi"],"<b>Saturday</b> = samedi. En anglais, les jours prennent une majuscule.","Saturday"],
+ ["Comment dit-on « décembre » ?","December",["November","September","October"],"<b>December</b> = décembre. Les mois prennent aussi une majuscule en anglais.","December"],
+ ["Que veut dire « my sister » ?","ma sœur",["mon frère","ma mère","ma cousine"],"<b>Sister</b> = sœur. Brother = frère, mother = mère.","my sister"],
+ ["Comment dit-on « grand-père » ?","grandfather",["grandmother","uncle","father"],"<b>Grandfather</b> (ou grandpa) = grand-père. Grandmother = grand-mère.","grandfather"],
+ ["Que veut dire « an elephant » ?","un éléphant",["un lion","une baleine","un singe"],"<b>Elephant</b> s'écrit presque comme en français. On dit <i>an</i> devant une voyelle.","an elephant"],
+ ["Comment dit-on « cheval » ?","horse",["house","mouse","cow"],"<b>Horse</b> = cheval. Attention : house = maison, mouse = souris.","horse"],
+ ["Que veut dire « an apple » ?","une pomme",["une poire","une orange","une banane"],"<b>Apple</b> = pomme.","an apple"],
+ ["Comment dit-on « le pain » ?","bread",["butter","cheese","milk"],"<b>Bread</b> = pain. Butter = beurre, cheese = fromage, milk = lait.","bread"],
+ ["Que veut dire « a pencil » ?","un crayon",["un stylo","une gomme","une règle"],"<b>Pencil</b> = crayon. Pen = stylo, rubber = gomme, ruler = règle.","a pencil"],
+ ["Comment répond-on à « How old are you? » ?","I'm ten.",["I'm fine.","My name is Jade.","I'm from France."],"<b>How old are you?</b> = Quel âge as-tu ? → <b>I'm ten</b> (j'ai dix ans). En anglais, on <i>est</i> son âge.","How old are you? I'm ten."],
+ ["Que veut dire « Where do you live? » ?","Où habites-tu ?",["Comment t'appelles-tu ?","Que fais-tu ?","Quand viens-tu ?"],"<b>Where</b> = où, <b>live</b> = habiter. Réponse : <i>I live in Pertuis.</i>","Where do you live? I live in Pertuis."],
+ ["Comment dit-on « J'aime le chocolat » ?","I like chocolate.",["I have chocolate.","I am chocolate.","I want a chocolate."],"<b>I like</b> = j'aime. I have = j'ai, I am = je suis.","I like chocolate."],
+ ["Complète : « She ___ a cat. »","has got",["have got","is","are"],"Avec <b>he / she / it</b>, on dit <b>has got</b>. Avec I / you / we / they : have got.","She has got a cat."],
+ ["Complète : « We ___ happy. »","are",["is","am","be"],"Le verbe être : I <b>am</b>, you <b>are</b>, he/she <b>is</b>, we <b>are</b>, they <b>are</b>.","We are happy."],
+ ["Complète : « I ___ eleven years old. »","am",["is","are","have"],"Avec <b>I</b>, être se dit <b>am</b> : I am eleven.","I am eleven years old."],
+ ["Que veut dire « It's raining » ?","Il pleut.",["Il neige.","Il fait beau.","Il y a du vent."],"<b>It's raining</b> = il pleut. It's snowing = il neige, it's sunny = il fait beau, it's windy = il y a du vent.","It's raining."],
+ ["Que veut dire « head » ?","la tête",["la main","le pied","le dos"],"<b>Head</b> = tête. Hand = main, foot = pied, back = dos.","head"],
+ ["Quel est le pluriel de « child » ?","children",["childs","childes","childrens"],"<b>Child</b> (enfant) a un pluriel irrégulier : <b>children</b>. Comme man → men, foot → feet.","one child, two children"],
+ ["Que veut dire « What time is it? » ?","Quelle heure est-il ?",["Quel temps fait-il ?","Quel jour sommes-nous ?","Combien ça coûte ?"],"<b>Time</b> = l'heure ou le temps qui passe. Le temps qu'il fait se dit <i>weather</i>.","What time is it?"],
+ ["Comment dit-on « Je peux nager » ?","I can swim.",["I like swim.","I am swim.","I swim can."],"<b>I can</b> + verbe = je peux / je sais. I can swim, I can dance.","I can swim."],
+ ["Que veut dire « Thank you very much » ?","Merci beaucoup.",["De rien.","S'il te plaît.","Excuse-moi."],"<b>Thank you very much</b> = merci beaucoup. De rien = you're welcome. S'il te plaît = please.","Thank you very much."],
+ ["Quel mot est un sport ?","tennis",["kitchen","Tuesday","yellow"],"<b>Tennis</b> se dit pareil en anglais ! Kitchen = cuisine.","tennis"],
+];
+/* ============ LE CORPS HUMAIN (CM2) ============ */
+const ANAT=[
+ ["Combien d'os a environ un adulte ?","206",["32","1 000","58"],"Un adulte a environ <b>206 os</b>. Un bébé en a plus, certains se soudent en grandissant."],
+ ["Quel est l'os le plus long du corps ?","le fémur",["le tibia","l'humérus","la colonne vertébrale"],"Le <b>fémur</b> est l'os de la cuisse : c'est le plus long et le plus solide."],
+ ["Comment s'appelle l'endroit où deux os se rejoignent et peuvent bouger ?","une articulation",["un muscle","un tendon","une veine"],"Une <b>articulation</b> (genou, coude, épaule…) permet aux os de bouger l'un par rapport à l'autre."],
+ ["Qu'est-ce qui relie un muscle à un os ?","un tendon",["un nerf","une artère","un ligament"],"Le <b>tendon</b> relie le muscle à l'os. Le ligament relie deux os entre eux."],
+ ["Quand je plie le bras, que fait le biceps ?","il se contracte",["il s'allonge","il se repose","il disparaît"],"Pour plier le bras, le <b>biceps se contracte</b> (il raccourcit et gonfle) et le triceps se relâche."],
+ ["Quel organe commande tous les mouvements du corps ?","le cerveau",["le cœur","l'estomac","les poumons"],"Le <b>cerveau</b> envoie des messages aux muscles par les <b>nerfs</b>."],
+ ["Par quoi passent les messages entre le cerveau et les muscles ?","les nerfs",["les veines","les os","les tendons"],"Les <b>nerfs</b> transportent les messages, comme des câbles électriques."],
+ ["Quel est le rôle des poumons ?","faire entrer l'oxygène dans le sang",["digérer les aliments","filtrer l'urine","fabriquer les os"],"Dans les <b>poumons</b>, l'oxygène de l'air passe dans le sang. Le sang y laisse le dioxyde de carbone."],
+ ["Quel muscle nous aide à respirer, sous les poumons ?","le diaphragme",["le biceps","le mollet","l'abdomen"],"Le <b>diaphragme</b> se contracte pour faire entrer l'air dans les poumons."],
+ ["Dans quel ordre passent les aliments ?","bouche → œsophage → estomac → intestin grêle",["bouche → estomac → œsophage → intestin grêle","œsophage → bouche → intestin grêle → estomac","bouche → intestin grêle → estomac → œsophage"],"Le trajet : <b>bouche → œsophage → estomac → intestin grêle → gros intestin</b>."],
+ ["Que transportent les artères ?","le sang qui part du cœur",["l'air","les aliments","l'urine"],"Les <b>artères</b> amènent le sang du cœur vers les organes ; les <b>veines</b> le ramènent au cœur."],
+ ["Combien de fois environ le cœur d'un enfant bat-il par minute au repos ?","entre 70 et 100 fois",["2 fois","500 fois","1 fois par heure"],"Au repos, le cœur d'un enfant bat environ <b>70 à 100 fois par minute</b>. Plus quand on court !"],
+ ["Quel organe filtre le sang pour fabriquer l'urine ?","les reins",["le foie","les poumons","la rate"],"Les deux <b>reins</b> nettoient le sang et fabriquent l'urine."],
+ ["Combien un adulte a-t-il de dents définitives ?","32",["20","12","50"],"Un adulte a <b>32 dents</b>. Un enfant a 20 dents de lait."],
+ ["Quelles dents servent à couper les aliments ?","les incisives",["les molaires","les canines","les prémolaires"],"Les <b>incisives</b> coupent, les canines déchirent, les molaires broient."],
+ ["Avec quel organe des sens sent-on le froid et le chaud ?","la peau",["les yeux","les oreilles","le nez"],"La <b>peau</b> sent le toucher, la douleur, le chaud et le froid."],
+ ["Quelle partie de l'œil change de taille selon la lumière ?","la pupille",["la paupière","le cil","le sourcil"],"La <b>pupille</b> (le rond noir) s'agrandit dans le noir et rétrécit quand il y a beaucoup de lumière."],
+ ["Que protège la cage thoracique (les côtes) ?","le cœur et les poumons",["le cerveau","l'estomac seulement","les jambes"],"Les <b>côtes</b> forment une cage qui protège le <b>cœur et les poumons</b>."],
+ ["Que protège la colonne vertébrale ?","la moelle épinière",["le cœur","le foie","les dents"],"La <b>colonne vertébrale</b> est faite de vertèbres. Elle protège la <b>moelle épinière</b>, qui relie le cerveau aux nerfs du corps."],
+ ["Pourquoi faut-il dormir suffisamment ?","pour que le corps et le cerveau récupèrent",["pour grandir moins vite","pour avoir moins faim","ça ne sert à rien"],"Pendant le <b>sommeil</b>, le corps récupère, le cerveau range ce qu'on a appris et on grandit. Un enfant de 10 ans a besoin de 9 à 11 heures."],
+];
+
+/* Écoute en anglais (voix du navigateur) */
+function sayEn(t){try{if(typeof speechSynthesis==='undefined')return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.8;speechSynthesis.speak(u)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-say-en]');if(b){e.preventDefault();e.stopPropagation();sayEn(b.dataset.sayEn)}},true);
+const enBtn=t=>`<button type="button" class="enbtn" data-say-en="${esc(t)}" aria-label="Écouter en anglais">🔊 Écouter</button>`;
+function genEn(){
+  const [q,a,d,e,sy]=pick(EN);
+  return {key:'en'+q,type:'choice',kicker:'Anglais',prompt:`<div class="big" style="font-size:1.5rem">${esc(q)}</div>${enBtn(sy)}`,options:shuffle([a,...d]),answer:a,explain:e+`<div style="margin-top:8px">${enBtn(sy)}</div>`};
+}
+function genAnat(){const [q,a,d,e]=pick(ANAT);return {key:'an'+q,type:'choice',kicker:'Le corps humain',prompt:`<div class="big" style="font-size:1.5rem">${esc(q)}</div>`,options:shuffle([a,...d]),answer:a,explain:e}}
+
 const MODS=[
  {id:'conj',sub:'fr',name:'Conjugaison',desc:'Présent, futur, imparfait, passé composé',glyph:'je…',gen:genConj},
  {id:'nature',sub:'fr',name:'Nature des mots',desc:'Nom, verbe, adjectif, adverbe…',glyph:'Aa',gen:genNature},
@@ -1185,8 +1256,12 @@ const MODS=[
  {id:'histoire',sub:'mo',name:'Histoire',desc:'De 1789 à nos jours, frise chronologique',glyph:'1789',gen:genHist},
  {id:'geo',sub:'mo',name:'Géographie',desc:'France, Europe, monde, se déplacer, habiter',glyph:'N↑',gen:genGeo},
  {id:'cartes',sub:'mo',name:'Cartes',desc:'Explore et touche la carte de France et du monde',glyph:'◎',gen:genCarte},
+ {id:'corps',sub:'mo',name:'Le corps humain',desc:'Os, muscles, organes, les sens',glyph:'♥',gen:genAnat},
+ {id:'anglais',sub:'en',name:'Anglais',desc:'Mots, phrases et petite grammaire, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 const METHODS={
+ anglais:"1. J'appuie sur <b>Écouter</b> et je répète le mot à voix haute.<br>2. Je cherche s'il ressemble à un mot français (dinosaur, banana…).<br>3. J'élimine les réponses que je connais déjà.",
+ corps:"Je pense à mon propre corps : je peux toucher, plier, écouter mon cœur. Puis j'élimine les réponses impossibles.",
  conj:"1. Je repère le <b>temps</b> demandé (présent, futur, imparfait, passé composé).<br>2. Je repère la <b>personne</b> (je, tu, il, nous, vous, ils).<br>3. Je prends la terminaison de ce temps pour cette personne.<br>4. Je vérifie : tu → <b>s</b>, nous → <b>ons</b>, vous → <b>ez</b>, ils → <b>nt</b>.",
  nature:"Je fais les tests un par un :<br>• je peux mettre <i>un / le</i> devant ? → <b>nom</b><br>• il change avec <i>hier / demain</i> ? → <b>verbe</b><br>• il dit comment est le nom ? → <b>adjectif</b><br>• il est juste avant le nom ? → <b>déterminant</b><br>• il remplace un nom ? → <b>pronom</b><br>• il ne change jamais ? → adverbe, préposition ou conjonction",
  phrase:"1. Je trouve le <b>verbe</b> en changeant le temps.<br>2. Je trouve le <b>sujet</b> : « C'est … qui + verbe ».<br>3. Pour les autres groupes : verbe + <i>quoi ?</i> (COD), <i>à qui ? de quoi ?</i> (COI), <i>où ? quand ? comment ?</i> (CC). J'essaie de le déplacer ou de le supprimer.",
@@ -1203,7 +1278,7 @@ const METHODS={
 const REV={id:'revision',sub:'fr',name:'Mes erreurs à revoir',glyph:'↺'};
 const modById=id=>id==='revision'?REV:MODS.find(m=>m.id===id);
 const memoOf=q=>MEMO[(q&&q.modId)||(G&&G.mod.id)]||'';
-const ACC_VAR={fr:'var(--fr)',ma:'var(--ma)',mo:'var(--mo)'};
+const ACC_VAR={fr:'var(--fr)',ma:'var(--ma)',mo:'var(--mo)',en:'var(--en)'};
 function setAccent(sub){document.documentElement.style.setProperty('--accent',ACC_VAR[sub]||'var(--fr)')}
 
 /* ============ Temps actif ============ */
@@ -1255,7 +1330,7 @@ function home(){
    <button class="iconbtn" data-act="sound" aria-pressed="${P.sound}">${P.sound?'Son : oui':'Son : non'}</button></div></div>
   ${goalCard()}
   ${carnetCard()}
-  ${sect('fr','Français')}${sect('ma','Maths')}${sect('mo','Sciences, histoire & géo')}
+  ${sect('fr','Français')}${sect('ma','Maths')}${sect('mo','Sciences, histoire & géo')}${sect('en','Anglais')}
   <section class="album"><h2>Mes squishies</h2>
    <div class="sub">${u<SQ.length?`Encore <b>${next}</b> étoile${next>1?'s':''} pour adopter un nouveau squishy ! Touche un squishy pour le serrer et en faire ton compagnon.`:'Tu as adopté tous les squishies !'}</div>
    <div class="bar"><b style="width:${u<SQ.length?((P.stars%PER)/PER*100):100}%"></b></div>

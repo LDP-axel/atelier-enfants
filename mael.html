@@ -163,6 +163,11 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%
 :root{--mo:#3F6FD8;--mo-soft:#DCE6FB}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--mo:#86A8FF;--mo-soft:#1E2A47}}
 :root[data-theme="dark"]{--mo:#86A8FF;--mo-soft:#1E2A47}
+:root{--en:#8A4FD0;--en-soft:#EEE3FB}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--en:#B98CF0;--en-soft:#2C2140}}
+:root[data-theme="dark"]{--en:#B98CF0;--en-soft:#2C2140}
+.en .glyph{background:var(--en-soft);color:var(--en)} .en .atelier-head h2{color:var(--en)}
+.enbtn{margin-top:10px;font:inherit;font-weight:600;font-size:15px;padding:8px 14px;border-radius:999px;border:2px solid var(--en);background:var(--en-soft);color:var(--ink);cursor:pointer}
 .mo .glyph{background:var(--mo-soft);color:var(--mo)} .mo .atelier-head h2{color:var(--mo)}
 .sqw{display:inline-block;transform-origin:50% 92%;animation:breathe 2.8s ease-in-out infinite;cursor:pointer;line-height:0}
 .sqw svg{display:block;width:100%;height:auto;overflow:visible}
@@ -1277,6 +1282,8 @@ const MEMO={
  cartes:`<h3>Lire une carte</h3><ul><li>Nord en haut, sud en bas, ouest à gauche, est à droite</li><li>6 continents et 5 océans</li><li>La France est en Europe, entre la Manche, l'Atlantique et la Méditerranée</li></ul>`
 };
 const METHODS={
+ anglais:"1. J'appuie sur <b>Écouter</b> et je répète le mot à voix haute.<br>2. Je cherche s'il ressemble à un mot français (dinosaur, banana…).<br>3. J'élimine les réponses que je connais déjà.",
+ corps:"Je pense à mon propre corps : je peux toucher, plier, écouter mon cœur. Puis j'élimine les réponses impossibles.",
  conj:"1. Je regarde <b>qui</b> fait l'action : je, tu, il, nous, vous, ils.<br>2. Je trouve la terminaison : tu → <b>s</b>, nous → <b>ons</b>, vous → <b>ez</b>, ils → <b>ent</b>.<br>3. Être, avoir, aller : je récite la petite chanson par cœur (le bouton Rappel m'aide).",
  lettres:"Je regarde bien où est le <b>bâton</b> et où est le <b>rond</b>. Je fais l'astuce des pouces : main gauche = <b>b</b>, main droite = <b>d</b>. Je dis le mot tout bas, la main sur la gorge.",
  nature:"Je fais les tests : je peux mettre <i>un</i> ou <i>le</i> devant ? → nom. Il change avec <i>hier / demain</i> ? → verbe. Il dit comment est la chose ? → adjectif. Petit mot devant le nom ? → déterminant. Il remplace un nom ? → pronom.",
@@ -1296,6 +1303,71 @@ const METHODS={
  monde:"Je lis toutes les réponses et j'élimine celles qui sont impossibles.",
  cartes:"Nord en haut, sud en bas, ouest à gauche, est à droite."
 };
+/* ============ ANGLAIS (CE1) ============ */
+// [question, bonne réponse, [pièges], explication, mot à écouter en anglais]
+const EN=[
+ ["Écoute. Que veut dire « hello » ?","bonjour",["au revoir","merci","oui"],"<b>Hello</b> = bonjour. Goodbye = au revoir.","hello"],
+ ["Écoute. Que veut dire « goodbye » ?","au revoir",["bonjour","s'il te plaît","bonne nuit"],"<b>Goodbye</b> = au revoir.","goodbye"],
+ ["Comment dit-on « merci » ?","thank you",["please","sorry","yes"],"<b>Thank you</b> = merci. Please = s'il te plaît.","thank you"],
+ ["Écoute. Quelle couleur est « blue » ?","bleu",["rouge","vert","jaune"],"<b>Blue</b> = bleu.","blue"],
+ ["Comment dit-on « vert » ?","green",["red","black","white"],"<b>Green</b> = vert. Red = rouge, black = noir, white = blanc.","green"],
+ ["Écoute. Quelle couleur est « yellow » ?","jaune",["orange","rose","violet"],"<b>Yellow</b> = jaune, comme le soleil.","yellow"],
+ ["Comment dit-on « noir » ?","black",["blue","brown","white"],"<b>Black</b> = noir.","black"],
+ ["Écoute. Quel nombre est « three » ?","3",["2","8","13"],"<b>Three</b> = 3. One, two, <b>three</b>.","three"],
+ ["Comment dit-on « cinq » ?","five",["four","nine","fifteen"],"<b>Five</b> = 5.","five"],
+ ["Écoute. Quel nombre est « ten » ?","10",["2","12","7"],"<b>Ten</b> = 10, comme tes dix doigts.","ten"],
+ ["Écoute. Quel nombre est « seven » ?","7",["6","11","17"],"<b>Seven</b> = 7.","seven"],
+ ["Comment dit-on « douze » ?","twelve",["twenty","two","eleven"],"<b>Twelve</b> = 12. Twenty = 20.","twelve"],
+ ["Écoute. Quel animal est « a dog » ?","un chien",["un chat","un oiseau","un poisson"],"<b>Dog</b> = chien. Cat = chat.","a dog"],
+ ["Comment dit-on « un chat » ?","a cat",["a cow","a duck","a pig"],"<b>Cat</b> = chat.","a cat"],
+ ["Écoute. Quel animal est « a fish » ?","un poisson",["un oiseau","un lapin","une grenouille"],"<b>Fish</b> = poisson.","a fish"],
+ ["Écoute. Quel animal est « a bird » ?","un oiseau",["un ours","un poisson","un cheval"],"<b>Bird</b> = oiseau.","a bird"],
+ ["Comment dit-on « un dinosaure » ?","a dinosaur",["a dragon","a lion","a monkey"],"<b>Dinosaur</b> ressemble au mot français ! Comme ton compagnon dino.","a dinosaur"],
+ ["Écoute. Qui est « mum » ?","maman",["papa","ma sœur","mon frère"],"<b>Mum</b> = maman. Dad = papa.","mum"],
+ ["Comment dit-on « papa » ?","dad",["mum","brother","baby"],"<b>Dad</b> = papa.","dad"],
+ ["Écoute. Qui est « my sister » ?","ma sœur",["mon frère","ma maman","mon ami"],"<b>Sister</b> = sœur. Brother = frère.","my sister"],
+ ["Écoute. Que veut dire « an apple » ?","une pomme",["une banane","une fraise","un gâteau"],"<b>Apple</b> = pomme.","an apple"],
+ ["Comment dit-on « une banane » ?","a banana",["an orange","an apple","a cake"],"<b>Banana</b>, presque comme en français !","a banana"],
+ ["Écoute. Que veut dire « What's your name? » ?","Comment tu t'appelles ?",["Quel âge as-tu ?","Où vas-tu ?","Ça va ?"],"<b>What's your name?</b> → on répond : <i>My name is Mael.</i>","What's your name? My name is Mael."],
+ ["Que répond-on à « How are you? » ?","I'm fine, thank you.",["I'm seven.","My name is Mael.","Goodbye."],"<b>How are you?</b> = Comment vas-tu ? → <b>I'm fine</b> = je vais bien.","How are you? I'm fine, thank you."],
+ ["Écoute. Que veut dire « yes » ?","oui",["non","peut-être","bonjour"],"<b>Yes</b> = oui. No = non.","yes"],
+ ["Écoute. Quelle partie du corps est « nose » ?","le nez",["la bouche","l'oreille","l'œil"],"<b>Nose</b> = nez. Mouth = bouche, ear = oreille, eye = œil.","nose"],
+ ["Comment dit-on « la main » ?","hand",["head","foot","arm"],"<b>Hand</b> = main. Head = tête, foot = pied.","hand"],
+];
+/* ============ LE CORPS HUMAIN (CE1) ============ */
+const ANAT=[
+ ["Combien avons-nous de sens ?","5",["3","7","10"],"Nous avons <b>5 sens</b> : la vue, l'ouïe, l'odorat, le goût et le toucher."],
+ ["Avec quoi voit-on ?","les yeux",["les oreilles","le nez","la langue"],"On voit avec les <b>yeux</b> : c'est la vue."],
+ ["Avec quoi entend-on ?","les oreilles",["les yeux","la bouche","les mains"],"On entend avec les <b>oreilles</b> : c'est l'ouïe."],
+ ["Avec quoi sent-on les odeurs ?","le nez",["la langue","les yeux","les pieds"],"On sent les odeurs avec le <b>nez</b> : c'est l'odorat."],
+ ["Avec quoi goûte-t-on le sucré et le salé ?","la langue",["le nez","les dents","les oreilles"],"On goûte avec la <b>langue</b> : c'est le goût."],
+ ["Avec quoi sent-on si c'est doux ou piquant ?","la peau",["les yeux","les cheveux","les ongles"],"On touche avec la <b>peau</b>, surtout avec le bout des doigts : c'est le toucher."],
+ ["Qu'est-ce qui bat dans notre poitrine ?","le cœur",["l'estomac","les poumons","le cerveau"],"Le <b>cœur</b> bat pour envoyer le sang dans tout le corps."],
+ ["À quoi servent les poumons ?","à respirer",["à manger","à marcher","à voir"],"Les <b>poumons</b> se remplissent d'air quand on respire."],
+ ["Où vont les aliments quand on les avale ?","dans l'estomac",["dans les poumons","dans le cœur","dans la tête"],"Les aliments descendent dans l'<b>estomac</b>, où ils sont transformés."],
+ ["Qu'est-ce qui nous permet de penser ?","le cerveau",["le cœur","le ventre","les muscles"],"Le <b>cerveau</b> est dans la tête, protégé par le crâne. Il nous fait penser et bouger."],
+ ["Qu'est-ce qui tient notre corps debout, à l'intérieur ?","le squelette",["la peau","le sang","les cheveux"],"Le <b>squelette</b> est fait de tous nos os. Il tient le corps et protège les organes."],
+ ["Quel os protège le cerveau ?","le crâne",["les côtes","le genou","le pied"],"Le <b>crâne</b> est comme un casque pour le cerveau."],
+ ["Qu'est-ce qui fait bouger nos os ?","les muscles",["les cheveux","les ongles","la peau"],"Les <b>muscles</b> tirent sur les os pour nous faire bouger."],
+ ["Où se plie la jambe ?","au genou",["au coude","au poignet","à l'épaule"],"La jambe se plie au <b>genou</b>. Le bras se plie au coude."],
+ ["Où se plie le bras ?","au coude",["au genou","à la cheville","au cou"],"Le bras se plie au <b>coude</b>."],
+ ["Comment s'appellent les premières dents des enfants ?","les dents de lait",["les dents de sagesse","les crocs","les dents en sucre"],"Les <b>dents de lait</b> tombent vers 6 ans et sont remplacées par les dents définitives."],
+ ["Combien de fois par jour faut-il se brosser les dents ?","2 fois",["1 fois par semaine","jamais","10 fois"],"On se brosse les dents <b>matin et soir</b>, pendant 2 minutes."],
+ ["Que faut-il faire avant de manger ?","se laver les mains",["courir","dormir","se brosser les cheveux"],"On se <b>lave les mains</b> avec du savon pour enlever les microbes."],
+ ["Combien d'heures environ un enfant de 7 ans doit-il dormir ?","10 à 11 heures",["3 heures","5 heures","20 heures"],"À 7 ans, il faut dormir environ <b>10 à 11 heures</b> pour bien grandir et bien apprendre."],
+ ["Que se passe-t-il quand on court vite ?","le cœur bat plus vite",["le cœur s'arrête","on respire moins","on a froid aux oreilles"],"Quand on court, les muscles ont besoin de plus d'oxygène : le <b>cœur bat plus vite</b> et on respire plus vite."],
+];
+
+/* Écoute en anglais (voix du navigateur) */
+function sayEn(t){try{if(typeof speechSynthesis==='undefined')return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.7;speechSynthesis.speak(u)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-say-en]');if(b){e.preventDefault();e.stopPropagation();sayEn(b.dataset.sayEn)}},true);
+const enBtn=t=>`<button type="button" class="enbtn" data-say-en="${esc(t)}" aria-label="Écouter en anglais">🔊 Écouter</button>`;
+function genEn(){
+  const [q,a,d,e,sy]=pick(EN);
+  return {key:'en'+q,type:'choice',kicker:'Anglais',prompt:`<div class="big" style="font-size:1.45rem">${esc(q)}</div>${enBtn(sy)}`,options:shuffle([a,...d]),answer:a,explain:e+`<div style="margin-top:8px">${enBtn(sy)}</div>`};
+}
+function genAnat(){const [q,a,d,e]=pick(ANAT);return {key:'an'+q,type:'choice',kicker:'Le corps humain',prompt:`<div class="big" style="font-size:1.45rem">${esc(q)}</div>`,options:shuffle([a,...d]),answer:a,explain:e}}
+
 const MODS=[
  {id:'conj',sub:'fr',name:'Le présent',desc:'Être, avoir, les verbes en -er… pas à pas',glyph:'je…',gen:genConjPres},
  {id:'lettres',sub:'fr',name:'b, d, p, q, t',desc:'Ne plus confondre les lettres jumelles',glyph:'b d',gen:genLettres},
@@ -1316,6 +1388,8 @@ const MODS=[
  {id:'mesures',sub:'ma',name:'Heure & mesures',desc:'L’horloge, la monnaie, le calendrier',glyph:'9:15',gen:genMesures},
  {id:'monde',sub:'mo',name:'Questionner le monde',desc:'Le vivant, la matière, le temps',glyph:'☾',gen:genMonde},
  {id:'cartes',sub:'mo',name:'Cartes',desc:'Explore la France et le monde',glyph:'◎',gen:genCartesCE1},
+ {id:'corps',sub:'mo',name:'Le corps humain',desc:'Les 5 sens, les os, le cœur, l’hygiène',glyph:'♥',gen:genAnat},
+ {id:'anglais',sub:'en',name:'Anglais',desc:'Couleurs, nombres, animaux, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 
 /* ============ ADDITIONS / SOUSTRACTIONS avec explications visuelles ============ */
@@ -1646,7 +1720,7 @@ function newRegionBlock(prev){
 const REV={id:'revision',sub:'fr',name:'Mes erreurs à revoir',glyph:'↺'};
 const modById=id=>id==='revision'?REV:MODS.find(m=>m.id===id);
 const memoOf=q=>MEMO[(q&&q.modId)||(G&&G.mod.id)]||'';
-const ACC_VAR={fr:'var(--fr)',ma:'var(--ma)',mo:'var(--mo)'};
+const ACC_VAR={fr:'var(--fr)',ma:'var(--ma)',mo:'var(--mo)',en:'var(--en)'};
 function setAccent(sub){document.documentElement.style.setProperty('--accent',ACC_VAR[sub]||'var(--fr)')}
 
 /* ============ Temps actif ============ */
@@ -1698,7 +1772,7 @@ function home(){
    <button class="iconbtn" data-act="sound" aria-pressed="${P.sound}">${P.sound?'Son : oui':'Son : non'}</button></div></div>
   ${goalCard()}
   ${carnetCard()}
-  ${sect('fr','Français')}${sect('ma','Maths')}${sect('mo','Questionner le monde')}
+  ${sect('fr','Français')}${sect('ma','Maths')}${sect('mo','Questionner le monde')}${sect('en','Anglais')}
   ${questCard()}
   <section class="album"><h2>Mes compagnons d'aventure</h2>
    <div class="sub">${u<SQ.length?`Encore <b>${next}</b> étoile${next>1?'s':''} pour rencontrer un nouveau compagnon ! Touche un compagnon pour le choisir.`:'Tu as rencontré tous les compagnons !'}</div>
