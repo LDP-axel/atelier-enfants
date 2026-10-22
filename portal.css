@@ -46,3 +46,11 @@ details{border-top:1px solid var(--line);padding:8px 0}summary{cursor:pointer;fo
 .kidpick{display:grid;gap:8px;margin:12px 0}
 .kidpick .ck{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}
 .kidpick .ck input{width:22px;height:22px;flex:none}
+.famblock{margin-top:18px}
+.famtitle{font-size:1.2rem;margin:0 0 4px}
+.famparents{margin-top:12px;font-size:.95rem;line-height:1.7}
+.kstat{font-size:.9rem}
+.kgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.kgrid div{background:var(--bg);border-radius:12px;padding:8px 4px;font-size:.78rem;color:var(--muted,#5b6b6b);line-height:1.2}
+.kgrid b{display:block;font-size:1.15rem;color:var(--ink)}
+.pill.idle{background:var(--line);color:var(--ink)}

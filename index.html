@@ -62,10 +62,45 @@ async function route(){
     return;
   }
   const kids=await myChildren();
+  // Compteurs : état de chaque atelier, nombre de réponses, parents et invitations
+  const ids=kids.map(k=>k.id);
+  const [st,par,inv]=await Promise.all([
+    SB.from('child_state').select('child_id,state,updated_at').in('child_id',ids),
+    SB.rpc('family_parents'),
+    SB.from('family_invites').select('family_id,email')]);
+  const counts=await Promise.all(kids.map(k=>SB.from('attempts').select('id',{count:'exact',head:true}).eq('child_id',k.id)));
+  const ST={};(st.data||[]).forEach(r=>ST[r.child_id]=r);
+  const dkey=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+  const ago=t=>{if(!t)return 'jamais';const m=Math.round((Date.now()-new Date(t))/60000);if(m<2)return 'à l’instant';if(m<60)return `il y a ${m} min`;const h=Math.round(m/60);if(h<24)return `il y a ${h} h`;const d=Math.round(h/24);return d===1?'hier':`il y a ${d} jours`};
+  const fmtMin=ms=>{const m=Math.round(ms/60000);return m<60?`${m} min`:`${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}`};
+  const statsOf=(k,i)=>{
+    const r=ST[k.id], P=r&&r.state||{}, days=P.days||{}, today=dkey(new Date());
+    let w={ms:0,q:0,ok:0},all={ms:0,q:0,ok:0};
+    for(const [d,x] of Object.entries(days)){all.ms+=x.ms||0;all.q+=x.q||0;all.ok+=x.ok||0;if((Date.now()-new Date(d))/864e5<7){w.ms+=x.ms||0;w.q+=x.q||0;w.ok+=x.ok||0}}
+    const t=days[today]||{ms:0,q:0,ok:0}, last=r&&r.updated_at, actif=last&&(Date.now()-new Date(last))<2*864e5;
+    return `<div class="kstat"><span class="pill ${actif?'ok':'idle'}">${actif?'Actif':'Inactif'}</span> <span class="sub">dernière activité ${ago(last)}</span></div>
+     <div class="kgrid">
+      <div><b>${P.stars||0}</b>étoiles</div>
+      <div><b>${fmtMin(t.ms||0)}</b>aujourd’hui</div>
+      <div><b>${fmtMin(w.ms)}</b>sur 7 jours</div>
+      <div><b>${counts[i].count??all.q}</b>exercices faits</div>
+      <div><b>${w.q?Math.round(100*w.ok/w.q)+' %':'—'}</b>réussite 7 j</div>
+      <div><b>${all.q?Math.round(100*all.ok/all.q)+' %':'—'}</b>réussite totale</div>
+     </div>`;
+  };
+  const fams=[...new Set(kids.map(k=>k.family_id))];
+  const famBlock=f=>{
+    const fk=kids.filter(k=>k.family_id===f), ps=(par.data||[]).filter(p=>p.family_id===f), iv=(inv.data||[]).filter(x=>x.family_id===f);
+    return `<section class="famblock"><h2 class="famtitle">Famille de ${fk.map(k=>esc(k.first_name)).join(' et ')}</h2>
+     <div class="kids">${fk.map(k=>{const i=kids.indexOf(k);return `<div class="kid ${esc(k.slug)}"><h2>${esc(k.first_name)}</h2><div class="sub">${esc(k.grade)}</div>
+       ${statsOf(k,i)}
+       ${ATELIERS[k.slug]?`<a class="btn ${ATELIERS[k.slug].cls}" href="${ATELIERS[k.slug].page}">${ATELIERS[k.slug].btn}</a>`:''}
+       <a class="btn mo" href="histoires.html?enfant=${encodeURIComponent(k.slug)}">Atelier d'histoires</a></div>`}).join('')}</div>
+     <div class="card famparents"><b>Parents :</b> ${ps.map(p=>`${esc(p.email)}${p.email===user.email?' (vous)':''}${p.role==='owner'?' · créateur':''} <span class="sub">· connexion ${ago(p.last_sign_in)}</span>`).join('<br>')||'—'}
+      ${iv.length?`<br><b>Invitation en attente :</b> ${iv.map(x=>esc(x.email)).join(', ')}`:''}</div></section>`;
+  };
   main.innerHTML=`<h1>Qui joue aujourd'hui ?</h1><p class="sub">Connecté : ${esc(user.email)}. Tout ce que font les enfants est sauvegardé en ligne.</p>
-   <div class="kids">${kids.map(k=>`<div class="kid ${esc(k.slug)}"><h2>${esc(k.first_name)}</h2><div class="sub">${esc(k.grade)}</div>
-     ${ATELIERS[k.slug]?`<a class="btn ${ATELIERS[k.slug].cls}" href="${ATELIERS[k.slug].page}">${ATELIERS[k.slug].btn}</a>`:''}
-     <a class="btn mo" href="histoires.html?enfant=${encodeURIComponent(k.slug)}">Atelier d'histoires</a></div>`).join('')}</div>
+   ${fams.map(famBlock).join('')}
    <div class="card"><div class="row"><a class="btn ghost" href="parents.html">Espace parents</a><button class="btn ghost" id="out">Se déconnecter</button></div></div>`;
   $('#out').onclick=async()=>{await SB.auth.signOut();route()};
 }
