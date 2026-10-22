@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'atelier d'histoires</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="portal.css">
+<style>
+.step{font-family:var(--f-display);font-size:1.6rem;margin:6px 0 12px}
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:640px){.chips{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.chip{background:var(--card);border:3px solid var(--line);border-bottom-width:5px;border-radius:16px;padding:14px 10px;font:inherit;font-weight:700;font-size:1.1rem;color:var(--ink);cursor:pointer;min-height:64px}
+.chip.on{border-color:var(--mo);background:var(--mo-soft)}
+.progress{display:flex;gap:4px;margin:6px 0 14px}.progress i{flex:1;height:8px;border-radius:99px;background:var(--line)}.progress i.on{background:var(--mo)}
+.reader{font-family:var(--f-read);font-size:1.45rem;line-height:1.75;letter-spacing:.01em}
+.reader p{margin:0 0 1em;max-width:62ch}
+.reader.small{font-size:1.25rem}
+.gw{font:inherit;color:inherit;background:var(--sun-soft);border:none;border-bottom:3px dotted var(--sun);padding:0 2px;border-radius:4px;cursor:pointer}
+.def{position:sticky;bottom:12px;background:var(--card);border:3px solid var(--sun);border-radius:16px;padding:12px 14px;margin-top:10px;font-size:1.1rem}
+.tts{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
+.tts input{width:140px;padding:0}
+.opt{display:block;width:100%;text-align:left;margin-top:8px;background:var(--card);border:3px solid var(--line);border-radius:14px;padding:14px;font:inherit;font-size:1.15rem;color:var(--ink);cursor:pointer}
+.opt.ok{border-color:var(--good);background:var(--good-soft)}.opt.ko{border-color:var(--bad);background:var(--bad-soft)}
+.loading{display:grid;place-items:center;gap:14px;padding:40px 0;text-align:center}
+.book{width:90px;height:70px;position:relative}.book i{position:absolute;inset:0;border-radius:6px;background:var(--mo);animation:flip 1.2s ease-in-out infinite;transform-origin:left center}
+.book i:nth-child(2){animation-delay:.3s;background:var(--fr)}.book i:nth-child(3){animation-delay:.6s;background:var(--sun)}
+@keyframes flip{0%{transform:perspective(300px) rotateY(0)}50%{transform:perspective(300px) rotateY(-160deg)}100%{transform:perspective(300px) rotateY(-180deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.book i{animation:none}}
+</style>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="portal.js"></script>
+</head>
+<body>
+<main id="main"><p class="sub">Chargement…</p></main>
+<script>
+const main=$('#main');
+const qs=new URLSearchParams(location.search);
+const SLUG=(qs.get('enfant')||'mael').toLowerCase();
+let KID=null, ANS={}, STEP=0, STORY=null, PAGE=0, QI=0, SCORE=0, ACTIVE_MS=0, lastAct=Date.now(), STORY_ID=null;
+['pointerdown','keydown'].forEach(e=>document.addEventListener(e,()=>lastAct=Date.now(),true));
+setInterval(()=>{if(STORY&&!document.hidden&&Date.now()-lastAct<90000)ACTIVE_MS+=1000},1000);
+const STEPS=()=>[
+ {k:'heros',q:'Comment s’appelle ton héros ou ton héroïne ?',s:[KID?KID.first_name:'Léo','Lila','Tom','Nina','Sacha','Zoé']},
+ {k:'compagnon',q:'Qui l’accompagne ?',s:['un chat qui parle','un petit dragon','un robot rigolo','un renard malin',SLUG==='jade'?'un squishy magique':'un dinosaure gentil','personne, il part seul']},
+ {k:'epoque',q:'À quelle époque se passe l’histoire ?',s:['la préhistoire','l’Antiquité','le Moyen Âge','aujourd’hui','le futur','un monde magique']},
+ {k:'lieu',q:'Où se passe l’histoire ?',s:['une forêt enchantée','un grand château','l’espace','le fond de l’océan','une grande ville','une île mystérieuse']},
+ {k:'genre',q:'Quel genre d’histoire veux-tu ?',s:['une quête','une enquête','une aventure','un conte','une histoire drôle']},
+ {k:'objectif',q:'Quel est le but du héros ?',s:['trouver un trésor','sauver un ami','résoudre un mystère','rapporter un objet magique','gagner une course','aider un animal perdu']},
+ {k:'obstacle',q:'Quel obstacle va-t-il rencontrer ?',s:['une tempête','une énigme à résoudre','un pont cassé','un voleur maladroit','une porte secrète','un épais brouillard']},
+ {k:'ton',q:'Comment veux-tu que soit l’histoire ?',s:['drôle','mystérieuse','émouvante','pleine d’action']}
+];
+const clean=v=>String(v||'').replace(/[<>{}\[\]]/g,'').replace(/\s+/g,' ').trim().slice(0,40);
+function library(list){
+  main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>L'atelier d'histoires de ${esc(KID.first_name)}</h1><a class="btn ghost" href="index.html">← Accueil</a></div>
+  <div class="card"><h2>Inventer une nouvelle histoire</h2><p>Tu choisis le héros, l'époque, le lieu et l'aventure. Je t'écris une histoire rien que pour toi, à lire en 3 pages.</p>
+   <button class="btn mo" id="go">Je commence !</button></div>
+  <div class="card"><h2>Ma bibliothèque</h2>${list.length?list.map(s=>`<p><button class="btn ghost" data-id="${esc(s.id)}" style="min-height:0;padding:8px 14px">${esc(s.title||'Histoire')}</button> <span class="sub">${new Date(s.created_at).toLocaleDateString('fr-FR')}${s.score!=null?` · ${s.score} bonne${s.score>1?'s':''} réponse${s.score>1?'s':''}`:''}</span></p>`).join(''):'<p class="sub">Tes histoires apparaîtront ici.</p>'}</div>`;
+  $('#go').onclick=()=>{ANS={};STEP=0;wizard()};
+  document.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>openStory(b.dataset.id));
+}
+function wizard(){
+  const S=STEPS(), st=S[STEP], cur=ANS[st.k]||'';
+  main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>Mon histoire</h1><button class="btn ghost" id="quit">Annuler</button></div>
+  <div class="progress">${S.map((_,i)=>`<i class="${i<=STEP?'on':''}"></i>`).join('')}</div>
+  <div class="card"><div class="kicker">Question ${STEP+1} sur ${S.length}</div><div class="step">${st.q}</div>
+   <div class="chips">${st.s.map(x=>`<button class="chip ${cur===x?'on':''}" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+   <label>Ou ton idée à toi<input id="own" maxlength="40" value="${st.s.includes(cur)?'':esc(cur)}" placeholder="Écris ici…"></label>
+   <div class="row" style="margin-top:14px">${STEP?'<button class="btn ghost" id="back">← Retour</button>':''}<button class="btn mo" id="next">${STEP===S.length-1?'Voir mon histoire':'Suivant →'}</button></div><div id="m" class="msg err"></div></div>`;
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ANS[st.k]=c.dataset.v;$('#own').value='';document.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===c))});
+  $('#own').oninput=e=>{ANS[st.k]=clean(e.target.value);document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'))};
+  $('#quit').onclick=start;
+  if($('#back'))$('#back').onclick=()=>{STEP--;wizard()};
+  $('#next').onclick=()=>{if(!clean(ANS[st.k])){$('#m').textContent='Choisis une réponse ou écris ton idée.';return}ANS[st.k]=clean(ANS[st.k]);if(STEP<S.length-1){STEP++;wizard()}else summary()};
+}
+function summary(){
+  main.innerHTML=`<h1>Ton histoire va parler de…</h1><div class="card reader small"><p><b>${esc(ANS.heros)}</b>, avec ${esc(ANS.compagnon)}, à l'époque de ${esc(ANS.epoque)}, dans ${esc(ANS.lieu)}.</p>
+   <p>C'est ${esc(ANS.genre)} : le but est de ${esc(ANS.objectif)}, malgré ${esc(ANS.obstacle)}. Une histoire ${esc(ANS.ton)} !</p></div>
+   <div class="row" style="margin-top:14px"><button class="btn ghost" id="edit">Changer</button><button class="btn mo" id="write">Écris mon histoire !</button></div><div id="m" class="msg err"></div>`;
+  $('#edit').onclick=()=>{STEP=0;wizard()};$('#write').onclick=generate;
+}
+async function generate(){
+  main.innerHTML=`<div class="loading"><div class="book"><i></i><i></i><i></i></div><h2>J'écris ton histoire…</h2><p class="sub">Cela prend environ 20 secondes.</p></div>`;
+  try{
+    const {data,error}=await SB.functions.invoke('story',{body:{child:SLUG,params:ANS}});
+    if(error||!data||data.error)throw new Error((data&&data.error)||'erreur');
+    STORY=data;
+    const {data:ins}=await SB.from('stories').insert({child_id:KID.id,params:ANS,title:data.title,pages:data.pages,glossary:data.glossary,questions:data.questions}).select('id').single();
+    STORY_ID=ins?ins.id:null;PAGE=0;ACTIVE_MS=0;read();
+  }catch(e){
+    main.innerHTML=`<div class="card"><h2>Oups, l'histoire n'a pas pu être écrite.</h2><p>Vérifie la connexion internet, puis réessaie. Si ça recommence, demande à Papa de regarder le guide (étape 4 : fonction « story »).</p>
+     <div class="row"><button class="btn mo" id="re">Réessayer</button><button class="btn ghost" id="bk">Retour</button></div></div>`;
+    $('#re').onclick=generate;$('#bk').onclick=start;
+  }
+}
+function withGlossary(text){
+  let html=esc(text);
+  (STORY.glossary||[]).forEach((g,i)=>{const w=esc(g.mot||'');if(!w)return;
+    const re=new RegExp('(^|[^\\p{L}])('+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?=[^\\p{L}]|$)','iu');
+    html=html.replace(re,(m,a,b)=>`${a}<button class="gw" data-g="${i}">${b}</button>`)});
+  return html.split(/\n+/).map(p=>`<p>${p}</p>`).join('');
+}
+function read(){
+  speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
+  const n=STORY.pages.length;
+  main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>${esc(STORY.title)}</h1><button class="btn ghost" id="lib">Bibliothèque</button></div>
+  <div class="kicker">Page ${PAGE+1} sur ${n}</div>
+  <div class="tts">${'speechSynthesis' in window?`<button class="btn mo" id="say">Lire à voix haute</button><button class="btn ghost" id="stop">Stop</button><label style="margin:0;font-weight:400">Vitesse <input id="rate" type="range" min="0.6" max="1.1" step="0.05" value="${localStorage.getItem('tts-rate')||0.85}"></label>`:''}</div>
+  <div class="card reader ${SLUG==='jade'?'small':''}">${withGlossary(STORY.pages[PAGE])}</div><div id="def"></div>
+  <p class="sub">Les mots surlignés sont expliqués : touche-les !</p>
+  <div class="row" style="margin-top:10px">${PAGE?'<button class="btn ghost" id="prev">← Page précédente</button>':''}<button class="btn mo" id="nextp">${PAGE<n-1?'Page suivante →':'Répondre aux questions'}</button></div>`;
+  document.querySelectorAll('.gw').forEach(b=>b.onclick=()=>{const g=STORY.glossary[+b.dataset.g];$('#def').innerHTML=`<div class="def"><b>${esc(g.mot)}</b> : ${esc(g.definition)}</div>`});
+  if($('#say')){$('#say').onclick=()=>{const u=new SpeechSynthesisUtterance(STORY.pages[PAGE]);u.lang='fr-FR';u.rate=+$('#rate').value;speechSynthesis.cancel();speechSynthesis.speak(u)};
+    $('#stop').onclick=()=>speechSynthesis.cancel();$('#rate').onchange=e=>{try{localStorage.setItem('tts-rate',e.target.value)}catch(_){}}}
+  $('#lib').onclick=start;
+  if($('#prev'))$('#prev').onclick=()=>{PAGE--;read();scrollTo(0,0)};
+  $('#nextp').onclick=()=>{if(PAGE<n-1){PAGE++;read();scrollTo(0,0)}else{QI=0;SCORE=0;quiz()}};
+}
+function quiz(){
+  speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
+  const Q=STORY.questions||[];if(QI>=Q.length)return finish();
+  const q=Q[QI];
+  main.innerHTML=`<h1>As-tu bien compris ?</h1><div class="kicker">Question ${QI+1} sur ${Q.length}</div>
+   <div class="card"><div class="step" style="font-size:1.35rem">${esc(q.question)}</div>${q.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}<div id="ex"></div></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i, ok=i===q.answer;if(ok)SCORE++;
+    document.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.answer)x.classList.add('ok');else if(j===i)x.classList.add('ko')});
+    SB.from('attempts').insert({child_id:KID.id,module_id:'histoires',question_key:'story-'+(STORY_ID||'')+'-'+QI,prompt:q.question,given:q.options[i],answer:q.options[q.answer],is_correct:ok,hints_used:0}).then(()=>{});
+    $('#ex').innerHTML=`<div class="rule"><b>${ok?'Bravo !':'Pas tout à fait.'}</b> ${esc(q.explication||'')}</div><button class="btn mo" id="nq" style="margin-top:8px">${QI<Q.length-1?'Question suivante':'Terminer'}</button>`;
+    $('#nq').onclick=()=>{QI++;quiz()};
+  });
+}
+async function addToChildState(stars,q,ok,ms){
+  const key=APP_KEYS[SLUG];let local=null;try{local=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
+  let remote=null;try{const {data}=await SB.from('child_state').select('state').eq('child_id',KID.id).maybeSingle();remote=data?data.state:null}catch(e){}
+  let P=(remote&&(!local||(remote.savedAt||0)>(local.savedAt||0)))?remote:(local||remote||{stars:0,days:{}});
+  P.stars=(P.stars||0)+stars;P.days=P.days||{};const d=new Date(),z=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  const r=P.days[z]=P.days[z]||{ms:0,q:0,ok:0,won:false};r.q+=q;r.ok+=ok;r.ms+=ms;P.savedAt=Date.now();
+  try{localStorage.setItem(key,JSON.stringify(P))}catch(e){}
+  try{await SB.from('child_state').upsert({child_id:KID.id,state:P,updated_at:new Date(P.savedAt).toISOString()})}catch(e){}
+}
+async function finish(){
+  const n=(STORY.questions||[]).length;
+  if(STORY_ID)SB.from('stories').update({score:SCORE}).eq('id',STORY_ID).then(()=>{});
+  await addToChildState(SCORE,n,SCORE,ACTIVE_MS);ACTIVE_MS=0;
+  main.innerHTML=`<div class="card" style="text-align:center"><h1>${SCORE===n?'Lecture parfaite !':SCORE>=n/2?'Bien lu !':'Bravo pour ta lecture !'}</h1>
+   <p style="font-size:1.3rem">${SCORE} bonne${SCORE>1?'s':''} réponse${SCORE>1?'s':''} sur ${n} · <b>+${SCORE} ★</b></p>
+   <p class="sub">Ton temps de lecture compte dans ton objectif du jour.</p>
+   <div class="row" style="justify-content:center"><button class="btn ghost" id="again">Relire l'histoire</button><button class="btn mo" id="new">Une nouvelle histoire</button><a class="btn" href="${SLUG==='jade'?'jade.html':'mael.html'}">Mon atelier</a></div></div>`;
+  $('#again').onclick=()=>{PAGE=0;read()};$('#new').onclick=()=>{ANS={};STEP=0;wizard()};
+}
+async function openStory(id){
+  const {data}=await SB.from('stories').select('*').eq('id',id).maybeSingle();
+  if(!data)return start();STORY={title:data.title,pages:data.pages,glossary:data.glossary||[],questions:data.questions||[]};STORY_ID=data.id;PAGE=0;ACTIVE_MS=0;read();
+}
+async function start(){
+  STORY=null;
+  const {data}=await SB.from('stories').select('id,title,score,created_at').eq('child_id',KID.id).order('created_at',{ascending:false}).limit(50);
+  library(data||[]);
+}
+(async()=>{
+  if(!SB)return needConfig(main);
+  if(!await currentUser()){location.href='index.html';return}
+  const fam=await myFamily();if(!fam){location.href='index.html';return}
+  KID=(await myChildren()).find(k=>k.slug===SLUG);
+  if(!KID){main.innerHTML='<div class="card">Profil introuvable. <a href="index.html">Retour</a></div>';return}
+  const id=qs.get('id');if(id)openStory(id);else start();
+})();
+</script>
+</body>
+</html>

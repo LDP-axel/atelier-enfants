@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Espace parents</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="portal.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="portal.js"></script>
+</head>
+<body>
+<main id="main"><p class="sub">Chargement…</p></main>
+<script>
+const main=$('#main');
+const MODNAMES={conj:'Conjugaison',nature:'Nature des mots',phrase:'Sujet & verbe',accords:'Accords',ligne:'Ligne graduée',poser:'Opérations posées',tables:'Tables',mental:'Calcul mental',sciences:'Sciences',histoire:'Histoire',geo:'Géographie',cartes:'Cartes',ortho:'Orthographe',vocab:'Vocabulaire',nombres:'Nombres',problemes:'Problèmes',mesures:'Heure & mesures',monde:'Questionner le monde',add:'Additions',sub:'Soustractions',lettres:'Lettres b d p q t',revision:'Révision',histoires:'Histoires'};
+let FAM=null,KIDS=[],CUR=null,DATA={};
+const dkey=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
+const pctOf=r=>r&&r.q?Math.round(100*r.ok/r.q):0;
+function dayMet(P,r){const S=P.set||{};return !!r&&r.ms>=(S.min||20)*60000&&r.q>=10&&pctOf(r)>=(S.pct||70)}
+async function load(kid){
+  const [st,at,so]=await Promise.all([
+    SB.from('child_state').select('state,updated_at').eq('child_id',kid.id).maybeSingle(),
+    SB.from('attempts').select('module_id,prompt,given,answer,is_correct,hints_used,created_at').eq('child_id',kid.id).order('created_at',{ascending:false}).limit(1000),
+    SB.from('stories').select('id,title,score,created_at,params').eq('child_id',kid.id).order('created_at',{ascending:false}).limit(100)]);
+  DATA[kid.slug]={state:st.data?st.data.state:null,updated:st.data?st.data.updated_at:null,attempts:at.data||[],stories:so.data||[]};
+}
+function view(){
+  const kid=KIDS.find(k=>k.slug===CUR), D=DATA[CUR]||{}, P=D.state||{days:{},set:{}}, S=P.set||{};
+  const today=dkey(new Date()), r=(P.days||{})[today]||{ms:0,q:0,ok:0};
+  const days=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-13+i);const k=dkey(d);return [k,(P.days||{})[k]||{ms:0,q:0,ok:0}]});
+  const wk=days.slice(-7), wq=wk.reduce((s,[,x])=>s+x.q,0), wok=wk.reduce((s,[,x])=>s+x.ok,0), maxMs=Math.max(1,...days.map(([,x])=>x.ms));
+  const mods={};(D.attempts||[]).forEach(a=>{const m=mods[a.module_id]=mods[a.module_id]||{n:0,ok:0,h:0};m.n++;if(a.is_correct)m.ok++;m.h+=a.hints_used||0});
+  const weekId=Object.keys(P.weeks||{}).sort().pop(), W=weekId?P.weeks[weekId]:null;
+  main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>Espace parents</h1><a class="btn ghost" href="index.html">← Accueil</a></div>
+  <div class="tabs" role="tablist">${KIDS.map(k=>`<button role="tab" aria-selected="${k.slug===CUR}" data-k="${esc(k.slug)}">${esc(k.first_name)} (${esc(k.grade)})</button>`).join('')}<button role="tab" aria-selected="${CUR==='_fam'}" data-k="_fam">Famille & sauvegarde</button></div>
+  ${CUR==='_fam'?famView():`
+  <div class="card"><div class="kicker">Résumé · dernière synchronisation ${D.updated?new Date(D.updated).toLocaleString('fr-FR'):'jamais'}</div>
+   ${D.state?'':'<p class="sub">Pas encore de données en ligne : demandez à '+esc(kid.first_name)+' d’ouvrir son atelier sur un appareil connecté.</p>'}
+   <div class="stats"><div class="stat"><b>${P.stars||0}</b>étoiles</div><div class="stat"><b>${Math.floor(r.ms/60000)} min</b>aujourd'hui (objectif ${S.min||'?'})</div>
+   <div class="stat"><b>${r.q?pctOf(r)+' %':'—'}</b>réussite aujourd'hui</div><div class="stat"><b>${wq?Math.round(100*wok/wq)+' %':'—'}</b>réussite 7 jours (${wq} questions)</div></div>
+   <div class="kicker" style="margin-top:14px">Temps de travail, 14 derniers jours (jaune = objectif du jour atteint)</div>
+   <div class="bars">${days.map(([k,x])=>`<div class="${dayMet(P,x)?'met':''}" style="height:${Math.round(x.ms/maxMs*100)}%" title="${k} : ${Math.floor(x.ms/60000)} min, ${x.q} questions, ${pctOf(x)} %"></div>`).join('')}</div>
+   <div class="barlab">${days.map(([k])=>`<span>${k.slice(8)}</span>`).join('')}</div>
+   <p>${W?(W.unlocked?`Cadeau de la semaine <b>gagné</b>${W.choice?` · choix : <b>${esc(W.choice)}</b>${W.given?' (remis)':' (à remettre)'}`:''}.`:'Cadeau de la semaine pas encore gagné.'):''}</p></div>
+  <div class="card"><h2>Par matière</h2><div class="tablewrap"><table><tr><th>Atelier</th><th>Questions</th><th>Réussite</th><th>Indices utilisés</th><th>Niveau</th></tr>
+   ${Object.entries(mods).sort((a,b)=>b[1].n-a[1].n).map(([m,x])=>`<tr><td>${esc(MODNAMES[m]||m)}</td><td>${x.n}</td><td><span class="pill ${x.ok/x.n>=.7?'ok':'ko'}">${Math.round(100*x.ok/x.n)} %</span></td><td>${x.h}</td><td>${(P.lv||{})[m]||''}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Aucune réponse enregistrée pour l’instant.</td></tr>'}</table></div></div>
+  <div class="card"><h2>Carnet d'erreurs à revoir (${(P.carnet||[]).length})</h2><p class="sub">Les questions ratées avec l'explication, pour en parler ensemble.</p>
+   ${(P.carnet||[]).slice().reverse().slice(0,40).map(e=>`<details><summary>${esc(MODNAMES[e.q.modId]||e.q.kicker||'')} · ${esc((e.q.prompt||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,110))}</summary>
+     <p>Sa réponse : <s>${esc(e.given||'')}</s></p><div class="rule">${e.q.explain||''}</div></details>`).join('')||'<p class="sub">Aucune erreur en attente. Bravo !</p>'}</div>
+  <div class="card"><h2>Dernières réponses</h2><div class="tablewrap"><table><tr><th>Date</th><th>Atelier</th><th>Question</th><th>Réponse</th><th></th></tr>
+   ${(D.attempts||[]).slice(0,60).map(a=>`<tr><td>${new Date(a.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(MODNAMES[a.module_id]||a.module_id)}</td><td>${esc((a.prompt||'').slice(0,90))}</td><td>${esc(a.given||'')}${a.is_correct?'':' → <b>'+esc(a.answer||'')+'</b>'}${a.hints_used?` <span class="sub">(${a.hints_used} indice${a.hints_used>1?'s':''})</span>`:''}</td><td><span class="pill ${a.is_correct?'ok':'ko'}">${a.is_correct?'✓':'✗'}</span></td></tr>`).join('')}</table></div></div>
+  <div class="card"><h2>Histoires</h2>${(D.stories||[]).map(s=>`<p><a href="histoires.html?enfant=${esc(CUR)}&id=${esc(s.id)}">${esc(s.title||'Histoire')}</a> <span class="sub">· ${new Date(s.created_at).toLocaleDateString('fr-FR')}${s.score!=null?` · questions : ${s.score}`:''}</span></p>`).join('')||'<p class="sub">Aucune histoire pour l’instant.</p>'}</div>
+  <div class="card"><h2>Sauvegarde</h2><p>Téléchargez toutes les données de ${esc(kid.first_name)} (progression, réponses, histoires).</p>
+   <div class="row"><button class="btn" id="xj">Tout télécharger (JSON)</button><button class="btn ghost" id="xc">Réponses en tableur (CSV)</button></div></div>`}`;
+  document.querySelectorAll('[role=tab]').forEach(b=>b.onclick=()=>{CUR=b.dataset.k;view()});
+  if(CUR!=='_fam'){
+    $('#xj').onclick=async()=>{const {data:all}=await SB.from('attempts').select('*').eq('child_id',kid.id).order('created_at');const {data:st}=await SB.from('stories').select('*').eq('child_id',kid.id);
+      download(`sauvegarde-${CUR}-${dkey(new Date())}.json`,JSON.stringify({enfant:kid,etat:D.state,reponses:all,histoires:st},null,1))};
+    $('#xc').onclick=async()=>{const {data:all}=await SB.from('attempts').select('created_at,module_id,prompt,given,answer,is_correct,hints_used').eq('child_id',kid.id).order('created_at');
+      const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const rows=[['date','atelier','question','reponse_donnee','bonne_reponse','juste','indices']].concat((all||[]).map(a=>[a.created_at,MODNAMES[a.module_id]||a.module_id,a.prompt,a.given,a.answer,a.is_correct?'oui':'non',a.hints_used]));
+      download(`reponses-${CUR}-${dkey(new Date())}.csv`,'﻿'+rows.map(r=>r.map(q).join(';')).join('\n'),'text/csv')};
+  } else famBind();
+}
+function famView(){
+  return `<div class="card"><h2>Inviter leur maman (ou un autre parent)</h2><p>Entrez son adresse e-mail. Elle crée ensuite son compte sur la page d'accueil du site avec <b>cette même adresse</b> : elle rejoint automatiquement la famille et voit tout.</p>
+   <form id="inv"><label>E-mail<input id="ie" type="email" required></label><div class="row" style="margin-top:12px"><button class="btn" type="submit">Inviter</button></div><div id="im" class="msg"></div></form>
+   <div id="pend" class="sub" style="margin-top:10px"></div></div>
+  <div class="card"><h2>Sauvegarde complète</h2><p>Un seul fichier avec les données des deux enfants.</p><button class="btn" id="xall">Tout télécharger</button></div>`;
+}
+async function famBind(){
+  const {data:inv}=await SB.from('family_invites').select('email,created_at');
+  const {count}=await SB.from('family_members').select('user_id',{count:'exact',head:true});
+  $('#pend').innerHTML=`${count||1} parent${(count||1)>1?'s':''} dans la famille.`+((inv||[]).length?` Invitation en attente : ${inv.map(i=>esc(i.email)).join(', ')}.`:'');
+  $('#inv').onsubmit=async e=>{e.preventDefault();const {error}=await SB.rpc('invite_parent',{p_family:FAM.id,p_email:$('#ie').value});
+    $('#im').className='msg '+(error?'err':'ok');$('#im').textContent=error?error.message:'Invitation enregistrée. Envoyez-lui l’adresse du site pour qu’elle crée son compte.';famBind()};
+  $('#xall').onclick=async()=>{const out={famille:FAM,date:new Date().toISOString(),enfants:[]};
+    for(const k of KIDS){const {data:st}=await SB.from('child_state').select('*').eq('child_id',k.id).maybeSingle();const {data:at}=await SB.from('attempts').select('*').eq('child_id',k.id);const {data:so}=await SB.from('stories').select('*').eq('child_id',k.id);out.enfants.push({enfant:k,etat:st,reponses:at,histoires:so})}
+    download(`sauvegarde-famille-${dkey(new Date())}.json`,JSON.stringify(out,null,1))};
+}
+(async()=>{
+  if(!SB)return needConfig(main);
+  if(!await currentUser()){location.href='index.html';return}
+  FAM=await myFamily();if(!FAM){location.href='index.html';return}
+  KIDS=await myChildren();CUR=KIDS[0]?KIDS[0].slug:'_fam';
+  await Promise.all(KIDS.map(load));view();
+})();
+</script>
+</body>
+</html>

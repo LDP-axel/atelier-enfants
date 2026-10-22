@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L'Atelier des enfants</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="portal.css">
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="portal.js"></script>
+</head>
+<body>
+<main id="main"><p class="sub">Chargement…</p></main>
+<script>
+const main=$('#main');
+function loginView(msg='',cls=''){
+  main.innerHTML=`<h1>L'Atelier des enfants</h1><p class="sub">Espace famille de Jade et Mael. Connexion réservée aux parents.</p>
+  <div class="card"><h2>Se connecter</h2>
+   <form id="f"><label>Adresse e-mail<input id="em" type="email" autocomplete="email" required></label>
+   <label>Mot de passe<input id="pw" type="password" autocomplete="current-password" minlength="8" required></label>
+   <div class="row" style="margin-top:14px"><button class="btn" type="submit">Se connecter</button><button class="btn ghost" type="button" id="su">Créer mon compte parent</button></div>
+   <p><button class="btn ghost" type="button" id="fg" style="min-height:0;padding:6px 12px;font-size:.9rem">Mot de passe oublié</button></p>
+   <div id="m" class="msg ${cls}">${msg}</div></form></div>
+  <p class="sub">Sans connexion, les ateliers marchent quand même sur cet appareil : <a href="jade.html">Atelier de Jade</a> · <a href="mael.html">Quête de Mael</a></p>`;
+  const em=()=>$('#em').value.trim(), pw=()=>$('#pw').value;
+  $('#f').onsubmit=async e=>{e.preventDefault();const {error}=await SB.auth.signInWithPassword({email:em(),password:pw()});
+    if(error){$('#m').className='msg err';$('#m').textContent=error.message.includes('confirm')?'Confirmez d’abord votre adresse avec le lien reçu par e-mail.':'E-mail ou mot de passe incorrect.'}else route()};
+  $('#su').onclick=async()=>{if(!em()||pw().length<8){$('#m').className='msg err';$('#m').textContent='Entrez votre e-mail et un mot de passe d’au moins 8 caractères, puis recliquez.';return}
+    const {error}=await SB.auth.signUp({email:em(),password:pw(),options:{emailRedirectTo:location.href.split('#')[0]}});
+    $('#m').className='msg '+(error?'err':'ok');$('#m').textContent=error?error.message:'Compte créé. Ouvrez le lien reçu par e-mail pour le confirmer, puis connectez-vous.'};
+  $('#fg').onclick=async()=>{if(!em()){$('#m').className='msg err';$('#m').textContent='Entrez d’abord votre e-mail.';return}
+    await SB.auth.resetPasswordForEmail(em(),{redirectTo:location.href.split('#')[0]});$('#m').className='msg ok';$('#m').textContent='Un e-mail pour changer de mot de passe vient d’être envoyé.'};
+}
+function newPasswordView(){
+  main.innerHTML=`<h1>Nouveau mot de passe</h1><div class="card"><form id="f"><label>Nouveau mot de passe<input id="pw" type="password" minlength="8" required></label>
+   <div class="row" style="margin-top:14px"><button class="btn" type="submit">Enregistrer</button></div><div id="m" class="msg"></div></form></div>`;
+  $('#f').onsubmit=async e=>{e.preventDefault();const {error}=await SB.auth.updateUser({password:$('#pw').value});
+    if(error){$('#m').className='msg err';$('#m').textContent=error.message}else route()};
+}
+async function route(){
+  if(!SB)return needConfig(main);
+  const user=await currentUser();if(!user)return loginView();
+  const fam=await myFamily();
+  if(!fam){
+    main.innerHTML=`<h1>Bienvenue !</h1><div class="card"><h2>Créer votre espace famille</h2><p>Je crée la famille avec les profils de <b>Jade (CM2)</b> et <b>Mael (CE1)</b>. Ensuite, vous pourrez inviter leur maman depuis l'espace parents.</p>
+     <p class="sub">Si leur maman vous a déjà invité, déconnectez-vous et reconnectez-vous : l'invitation sera acceptée automatiquement.</p>
+     <div class="row"><button class="btn" id="mk">Créer la famille</button><button class="btn ghost" id="out">Se déconnecter</button></div><div id="m" class="msg"></div></div>`;
+    $('#mk').onclick=async()=>{const {error}=await SB.rpc('setup_family',{p_name:'Famille'});if(error){$('#m').className='msg err';$('#m').textContent=error.message}else route()};
+    $('#out').onclick=async()=>{await SB.auth.signOut();route()};
+    return;
+  }
+  const kids=await myChildren();
+  main.innerHTML=`<h1>Qui joue aujourd'hui ?</h1><p class="sub">Connecté : ${esc(user.email)}. Tout ce que font les enfants est sauvegardé en ligne.</p>
+   <div class="kids">${kids.map(k=>`<div class="kid ${esc(k.slug)}"><h2>${esc(k.first_name)}</h2><div class="sub">${esc(k.grade)}</div>
+     <a class="btn ${k.slug==='jade'?'fr':''}" href="${k.slug==='jade'?'jade.html':'mael.html'}">${k.slug==='jade'?'Mon atelier':'Ma quête'}</a>
+     <a class="btn mo" href="histoires.html?enfant=${encodeURIComponent(k.slug)}">Atelier d'histoires</a></div>`).join('')}</div>
+   <div class="card"><div class="row"><a class="btn ghost" href="parents.html">Espace parents</a><button class="btn ghost" id="out">Se déconnecter</button></div></div>`;
+  $('#out').onclick=async()=>{await SB.auth.signOut();route()};
+}
+if(SB){SB.auth.onAuthStateChange(ev=>{if(ev==='PASSWORD_RECOVERY')newPasswordView()})}
+route();
+</script>
+</body>
+</html>
