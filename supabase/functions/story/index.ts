@@ -55,8 +55,8 @@ Deno.serve(async (req) => {
 Niveau : ${level}
 
 Réponds avec ce JSON exactement :
-{"title":"titre court","pages":["texte page 1","texte page 2","texte page 3"],"glossary":[{"mot":"un mot difficile présent tel quel dans le texte","definition":"définition simple pour un enfant"}],"questions":[{"question":"…","options":["…","…","…","…"],"answer":0,"explication":"phrase qui explique la bonne réponse en citant l'histoire"}]}
-Dans "pages", sépare les paragraphes par un retour à la ligne (\\n). "answer" est l'indice (0 à 3) de la bonne option ; varie la position de la bonne réponse.`;
+{"title":"titre court","pages":["texte page 1","texte page 2","texte page 3"],"glossary":[{"mot":"un mot difficile présent tel quel dans le texte","definition":"définition simple pour un enfant"}],"questions":[{"question":"…","bonne_reponse":"la seule réponse juste","mauvaises_reponses":["fausse 1","fausse 2","fausse 3"],"explication":"phrase qui explique la bonne réponse en citant l'histoire"}]}
+Dans "pages", sépare les paragraphes par un retour à la ligne (\\n). Pour chaque question, "bonne_reponse" doit être exactement la réponse que justifie "explication", et les "mauvaises_reponses" doivent être clairement fausses d'après l'histoire.`;
 
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -81,9 +81,21 @@ Dans "pages", sépare les paragraphes par un retour à la ligne (\\n). "answer" 
     const s = JSON.parse(m[0]);
     if (!s.title || !Array.isArray(s.pages) || !s.pages.length || !Array.isArray(s.questions)) return json({ error: "Histoire incomplète" }, 502);
     s.glossary = Array.isArray(s.glossary) ? s.glossary.slice(0, 10) : [];
-    s.questions = s.questions
-      .filter((q: { options?: unknown[]; answer?: number }) => Array.isArray(q.options) && q.options.length >= 2 && Number.isInteger(q.answer) && q.answer! < q.options.length)
-      .slice(0, 6);
+    // Les options sont mélangées ici : la bonne réponse est connue par son texte, pas par une position donnée par le modèle
+    type Q = { question?: string; bonne_reponse?: string; mauvaises_reponses?: unknown[]; explication?: string };
+    s.questions = (s.questions as Q[])
+      .filter((q) => q.question && q.bonne_reponse && Array.isArray(q.mauvaises_reponses) && q.mauvaises_reponses.length >= 1)
+      .slice(0, 6)
+      .map((q) => {
+        const good = String(q.bonne_reponse);
+        const bad = q.mauvaises_reponses!.map(String).filter((o) => o && o !== good).slice(0, 3);
+        const options = [good, ...bad];
+        for (let i = options.length - 1; i > 0; i--) {
+          const k = Math.floor(Math.random() * (i + 1));
+          [options[i], options[k]] = [options[k], options[i]];
+        }
+        return { question: q.question, options, answer: options.indexOf(good), explication: q.explication ?? "" };
+      });
     return json(s);
   } catch (_e) {
     return json({ error: "Erreur pendant la création de l'histoire" }, 500);
