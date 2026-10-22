@@ -1241,7 +1241,16 @@ const ANAT=[
 ];
 
 /* Écoute en anglais (voix du navigateur) */
-function sayEn(t){try{if(typeof speechSynthesis==='undefined')return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.8;speechSynthesis.speak(u)}catch(e){}}
+/* Voix anglaise native : on la choisit nous-mêmes, sinon le navigateur lit avec sa voix française */
+let EN_VOICE=null;
+function pickEnVoice(){try{const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang));if(!vs.length)return null;
+  const pref=['Daniel','Kate','Serena','Google UK English Female','Google UK English Male','Samantha','Karen','Moira','Google US English'];
+  for(const n of pref){const v=vs.find(x=>x.name.startsWith(n));if(v)return v}
+  return vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs[0]}catch(e){return null}}
+if(typeof speechSynthesis!=='undefined'){EN_VOICE=pickEnVoice();speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',()=>{EN_VOICE=pickEnVoice()})}
+function sayEn(t){try{if(typeof speechSynthesis==='undefined')return;speechSynthesis.cancel();EN_VOICE=EN_VOICE||pickEnVoice();
+  if(!EN_VOICE){alert("Il n'y a pas de voix anglaise sur cet appareil. Sur iPad : Réglages → Accessibilité → Contenu énoncé → Voix → Anglais.");return}
+  const u=new SpeechSynthesisUtterance(t);u.voice=EN_VOICE;u.lang=EN_VOICE.lang;u.rate=.8;speechSynthesis.speak(u)}catch(e){}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-say-en]');if(b){e.preventDefault();e.stopPropagation();sayEn(b.dataset.sayEn)}},true);
 const enBtn=t=>`<button type="button" class="enbtn" data-say-en="${esc(t)}" aria-label="Écouter en anglais">🔊 Écouter</button>`;
 function genEn(){
