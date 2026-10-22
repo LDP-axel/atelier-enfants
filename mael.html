@@ -339,6 +339,11 @@ polyline.hit:hover{stroke:rgba(247,181,0,.35)}
 .hstep ul{margin:0;padding-left:20px}
 .syncbadge{display:inline-block;margin-left:6px;font-size:.85rem;padding:2px 8px;border-radius:99px;background:var(--bg)}
 .syncbadge.ok{color:var(--good)}.syncbadge.warn{color:var(--bad)}.syncbadge a{color:inherit}
+.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:16px 0 4px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+.tabb{font:inherit;font-family:var(--f-display);font-weight:600;font-size:15px;padding:10px 4px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.tabb.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+@media (max-width:520px){.tabb{font-size:13px}}
+.qcard.cours h3{margin-top:14px}
 </style>
 <script>window.APP_CHILD="mael";</script>
 <script src="config.js"></script>
@@ -1384,6 +1389,40 @@ function genEn(){
 }
 function genAnat(){const [q,a,d,e]=pick(ANAT);return {key:'an'+q,type:'choice',kicker:'Le corps humain',prompt:`<div class="big" style="font-size:1.45rem">${esc(q)}</div>`,options:shuffle([a,...d]),answer:a,explain:e}}
 
+/* ============ ONGLETS : Cours · Exercices · Révision · Récompenses ============ */
+let TAB=(()=>{try{return localStorage.getItem(KEY+'-tab')||'ex'}catch(e){return 'ex'}})();
+const SUBN={fr:'Français',ma:'Maths',mo:'Monde & sciences',en:'Anglais'};
+function coursPanel(){
+  const has=m=>(typeof MEMO!=='undefined'&&MEMO[m.id])||(typeof METHODS!=='undefined'&&METHODS[m.id]);
+  return Object.entries(SUBN).map(([sub,title])=>{const ms=MODS.filter(m=>m.sub===sub&&!m.custom&&has(m));if(!ms.length)return '';
+    return `<section class="atelier ${sub}"><div class="atelier-head"><h2>${title}</h2></div><div class="tiles">${ms.map(m=>`<button class="tile" data-act="cours" data-id="${m.id}"><span class="glyph">${m.glyph}</span><div><h3>${m.name}</h3><p>La leçon et la méthode</p></div></button>`).join('')}</div></section>`}).join('')
+    ||'<p class="sub">Les fiches de cours arrivent bientôt.</p>';
+}
+function coursScreen(id){
+  const m=MODS.find(x=>x.id===id);if(!m)return home();G=null;keyHandler=null;setAccent(m.sub);
+  const memo=(typeof MEMO!=='undefined'&&MEMO[id])||'', meth=(typeof METHODS!=='undefined'&&METHODS[id])||'';
+  $app.innerHTML=`<div class="top"><button class="iconbtn" data-act="home">← Retour</button><div class="title">${m.name}</div></div>
+  <div class="qcard cours">${memo}${meth?`<h3>La méthode</h3><p>${meth}</p>`:''}
+   <div class="row" style="justify-content:flex-start;margin-top:14px"><button class="btn" data-act="open" data-id="${id}">Je m'entraîne</button></div></div>`;
+  window.scrollTo(0,0);
+}
+function applyTabs(){
+  const app=$app, par=app.querySelector('p.parents');
+  const T=[['cours','📚 Cours'],['ex','✏️ Exercices'],['rev','🔁 Révision'],['rec','⭐ Récompenses']];
+  const bar=document.createElement('div');bar.className='tabbar';bar.setAttribute('role','tablist');
+  bar.innerHTML=T.map(([k,l])=>`<button class="tabb ${k===TAB?'on':''}" role="tab" aria-selected="${k===TAB}" data-act="tab" data-t="${k}">${l}</button>`).join('');
+  const P_={};T.forEach(([k])=>{const d=document.createElement('div');d.className='tabp';d.hidden=k!==TAB;P_[k]=d});
+  app.querySelectorAll('section.atelier').forEach(s=>P_.ex.appendChild(s));
+  const car=app.querySelector('.carnet');
+  if(car)P_.rev.appendChild(car);else P_.rev.insertAdjacentHTML('beforeend','<section class="goal"><h2>Mon carnet de révision</h2><p style="margin:0">Aucune erreur à revoir pour l’instant. Bravo !</p></section>');
+  const cust=[...P_.ex.querySelectorAll('.tile[data-id^="c_"]')];
+  if(cust.length){const s=document.createElement('section');s.className='atelier mo';s.innerHTML='<div class="atelier-head"><h2>Mes révisions préparées</h2></div><div class="tiles"></div>';cust.forEach(t=>s.querySelector('.tiles').appendChild(t));P_.rev.appendChild(s)}
+  P_.ex.querySelectorAll('section.atelier').forEach(s=>{if(!s.querySelector('.tile'))s.remove()});
+  app.querySelectorAll('section.album').forEach(s=>P_.rec.appendChild(s));
+  P_.cours.innerHTML=coursPanel();
+  app.insertBefore(bar,par);T.forEach(([k])=>app.insertBefore(P_[k],par));
+}
+
 const MODS=[
  {id:'conj',sub:'fr',name:'Le présent',desc:'Être, avoir, les verbes en -er… pas à pas',glyph:'je…',gen:genConjPres},
  {id:'lettres',sub:'fr',name:'b, d, p, q, t',desc:'Ne plus confondre les lettres jumelles',glyph:'b d',gen:genLettres},
@@ -1796,6 +1835,7 @@ function home(){
    <div class="coll">${SQ.map((s,i)=>i<u?`<div class="cslot ${i===P.companion?'comp':''}">${squishy(i,'idle','','data-comp="1"')}<small>${s.n}${i===P.companion?' ♥':''}</small></div>`:`<div class="cslot">${squishy(i,'idle','locked')}<small>${i*PER} ★</small></div>`).join('')}</div>
    <div class="sub" style="margin-top:8px">Record au défi chrono des tables : <b>${P.chrono}</b> bonnes réponses en 60 secondes.</div></section>
   <p class="parents">Pour les parents : une partie = 10 questions. Le temps compte seulement quand ${NAME} joue. ${window.SYNC?window.SYNC.badge():''} <button class="linkbtn" data-act="parent">Espace parents</button></p>`;
+  applyTabs();
   checkRewards();
 }
 
@@ -2198,6 +2238,8 @@ document.addEventListener('click',e=>{
   if(sq&&!e.target.closest('[data-act]')){poke(sq,'squish','happy');sBoing();
     if(sq.dataset.comp){P.companion=+sq.dataset.sq;save();setTimeout(home,500)}return}
   const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(a==='tab'){TAB=t.dataset.t;try{localStorage.setItem(KEY+'-tab',TAB)}catch(_){};home();return}
+  if(a==='cours'){coursScreen(t.dataset.id);return}
   if(a==='open'){const id=t.dataset.id;if(id==='calc'&&typeof openCalc==='function')openCalc();else if(typeof LEVELS!=='undefined'&&LEVELS[id])levelSetup(id);else id==='tables'?tablesSetup():id==='cartes'?cartesSetup():start(id)}
   else if(a==='calc')openCalc();
   else if(a==='calcclose')closeCalc();

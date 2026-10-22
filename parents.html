@@ -21,7 +21,7 @@
 <main id="main"><p class="sub">Chargement…</p></main>
 <script>
 const main=$('#main');
-const MODNAMES={conj:'Conjugaison',nature:'Nature des mots',phrase:'Sujet & verbe',accords:'Accords',ligne:'Ligne graduée',poser:'Opérations posées',tables:'Tables',mental:'Calcul mental',sciences:'Sciences',histoire:'Histoire',geo:'Géographie',cartes:'Cartes',ortho:'Orthographe',vocab:'Vocabulaire',nombres:'Nombres',problemes:'Problèmes',mesures:'Heure & mesures',monde:'Questionner le monde',add:'Additions',sub:'Soustractions',lettres:'Lettres b d p q t',revision:'Révision',histoires:'Histoires',anglais:'Anglais',corps:'Le corps humain',sons:'Les sons',syllabes:'Les syllabes',lecture:'Je lis des mots',compter:'Je compte',calc:'Calculette'};
+const MODNAMES={conj:'Conjugaison',nature:'Nature des mots',phrase:'Sujet & verbe',accords:'Accords',ligne:'Ligne graduée',poser:'Opérations posées',tables:'Tables',mental:'Calcul mental',sciences:'Sciences',histoire:'Histoire',geo:'Géographie',cartes:'Cartes',ortho:'Orthographe',vocab:'Vocabulaire',nombres:'Nombres',problemes:'Problèmes',mesures:'Heure & mesures',monde:'Questionner le monde',add:'Additions',sub:'Soustractions',lettres:'Lettres b d p q t',revision:'Révision',histoires:'Histoires',anglais:'Anglais',corps:'Le corps humain',sons:'Les sons',syllabes:'Les syllabes',lecture:'Je lis des mots',compter:'Je compte',calc:'Calculette',volcans:'Les volcans',doubles:'Doubles et moitiés'};
 let FAM=null,KIDS=[],CUR=null,DATA={};
 const dkey=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
 const pctOf=r=>r&&r.q?Math.round(100*r.ok/r.q):0;

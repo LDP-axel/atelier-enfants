@@ -326,6 +326,11 @@ polyline.hit:hover{stroke:rgba(247,181,0,.35)}
 .hstep ul{margin:0;padding-left:20px}
 .syncbadge{display:inline-block;margin-left:6px;font-size:.85rem;padding:2px 8px;border-radius:99px;background:var(--bg)}
 .syncbadge.ok{color:var(--good)}.syncbadge.warn{color:var(--bad)}.syncbadge a{color:inherit}
+.tabbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:16px 0 4px;position:sticky;top:0;z-index:5;background:var(--bg);padding:6px 0}
+.tabb{font:inherit;font-family:var(--f-display);font-weight:600;font-size:15px;padding:10px 4px;border-radius:14px;border:2px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.tabb.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+@media (max-width:520px){.tabb{font-size:13px}}
+.qcard.cours h3{margin-top:14px}
 </style>
 <script>window.APP_CHILD="lila";</script>
 <script src="config.js"></script>
@@ -1171,6 +1176,8 @@ function calcKey(v){
 
 /* ============ Modules ============ */
 const MEMO={
+ volcans:`<h3>Les volcans</h3><ul><li>Sous la terre, la roche fondue est le <b>magma</b>. Il s'accumule dans la <b>chambre magmatique</b>.</li><li>Il monte par la <b>cheminée</b> et sort par le <b>cratère</b> : c'est alors la <b>lave</b>.</li><li>Les laves et les cendres forment le <b>cône</b>.</li><li>Éruption <b>effusive</b> : lave fluide, coulées (volcan rouge). Éruption <b>explosive</b> : cendres, nuées ardentes (volcan gris).</li><li>Les volcans sont surtout au bord des <b>plaques</b> qui bougent. Ces mouvements causent aussi les <b>séismes</b>.</li><li>Exemples : Piton de la Fournaise (La Réunion), chaîne des Puys (Auvergne), Vésuve (Pompéi), Etna.</li></ul>`,
+ doubles:`<h3>Doubles et moitiés</h3><ul><li>Le <b>double</b>, c'est × 2 : double de 34 = 68.</li><li>La <b>moitié</b>, c'est ÷ 2 : moitié de 68 = 34.</li><li>Je <b>décompose</b> : double de 47 = double de 40 + double de 7 = 80 + 14 = 94.</li><li>Moitié de 74 = moitié de 60 + moitié de 14 = 30 + 7 = 37.</li><li>Moitié d'un nombre impair : moitié de 15 = 7,5.</li><li>À connaître par cœur : doubles de 1 à 20, de 25 (50), 50 (100), 15 (30), 75 (150).</li></ul>`,
  conj:`<h3>Le rappel</h3><ul><li><b>Présent</b> : e, es, e, ons, ez, ent · is, is, it, issons, issez, issent</li><li><b>Futur</b> = infinitif + ai, as, a, ons, ez, ont</li><li><b>Imparfait</b> = radical de « nous » + ais, ais, ait, ions, iez, aient</li><li><b>Passé composé</b> = être / avoir + participe passé</li><li><b>é ou er ?</b> vendu → é · vendre → er</li></ul>`,
  nature:`<h3>Le rappel</h3><ul><li><b>Nom</b> : on met un / le devant</li><li><b>Déterminant</b> : juste avant le nom</li><li><b>Adjectif</b> : il est comment ?</li><li><b>Verbe</b> : change avec hier / demain</li><li><b>Pronom</b> : remplace un nom</li><li><b>Adverbe</b> : précise le verbe, ne change jamais</li><li><b>Préposition</b> : à, de, dans, sur, pour, avec…</li><li><b>Conjonction</b> : mais, ou, et, donc, or, ni, car</li></ul>`,
  phrase:`<h3>Le rappel</h3><ul><li>1. Le <b>verbe</b> : je change le temps, c'est le mot qui change.</li><li>2. Le <b>sujet</b> : « C'est … qui + verbe ».</li><li><b>COD</b> : qui ? quoi ? · <b>COI</b> : à qui ? de quoi ?</li><li><b>CC</b> : où ? quand ? comment ? → déplaçable</li><li><b>Attribut</b> : après être, sembler, devenir</li></ul>`,
@@ -1259,6 +1266,84 @@ function genEn(){
 }
 function genAnat(){const [q,a,d,e]=pick(ANAT);return {key:'an'+q,type:'choice',kicker:'Le corps humain',prompt:`<div class="big" style="font-size:1.5rem">${esc(q)}</div>`,options:shuffle([a,...d]),answer:a,explain:e}}
 
+/* ============ LES VOLCANS (cycle 3) ============ */
+const VOLC=[
+ ["Comment s'appelle la roche fondue qui sort d'un volcan ?","la lave",["le sable","le calcaire","la craie"],"Sous la terre, la roche fondue s'appelle le <b>magma</b>. Quand elle sort du volcan, on l'appelle la <b>lave</b>."],
+ ["Comment s'appelle la roche fondue quand elle est encore sous la terre ?","le magma",["la lave","le basalte","la cendre"],"Sous la terre, c'est le <b>magma</b>. Il remonte dans la cheminée du volcan."],
+ ["Où s'accumule le magma sous le volcan ?","dans la chambre magmatique",["dans le cratère","dans la nappe phréatique","dans le noyau"],"Le magma s'accumule dans la <b>chambre magmatique</b>, à plusieurs kilomètres sous le volcan."],
+ ["Par où le magma monte-t-il jusqu'en haut du volcan ?","par la cheminée",["par le cratère d'abord","par les racines","par la nappe d'eau"],"Le magma monte par la <b>cheminée</b>, puis sort par le <b>cratère</b>."],
+ ["Comment s'appelle l'ouverture au sommet du volcan ?","le cratère",["la cheminée","la coulée","le cône"],"L'ouverture au sommet est le <b>cratère</b>."],
+ ["Comment s'appelle la montagne formée par les coulées et les projections accumulées ?","le cône volcanique",["le cratère","la chambre magmatique","la faille"],"Les laves et les cendres s'empilent éruption après éruption et forment le <b>cône</b>."],
+ ["Quel type d'éruption fait couler une lave très liquide ?","une éruption effusive",["une éruption explosive","un séisme","un tsunami"],"Dans une éruption <b>effusive</b>, la lave est fluide et forme des <b>coulées</b>. On l'appelle aussi volcan « rouge »."],
+ ["Quel type d'éruption projette des cendres et des nuées brûlantes ?","une éruption explosive",["une éruption effusive","une marée","une coulée de boue tiède"],"Dans une éruption <b>explosive</b>, le magma est épais : les gaz font exploser la roche en cendres et en nuées ardentes. C'est un volcan « gris »."],
+ ["Comment appelle-t-on un nuage brûlant de gaz et de cendres qui dévale les pentes ?","une nuée ardente",["une coulée de lave","un geyser","une avalanche de neige"],"Une <b>nuée ardente</b> descend très vite et elle est très dangereuse."],
+ ["Quel volcan célèbre a enseveli la ville romaine de Pompéi en 79 ?","le Vésuve",["l'Etna","le Piton de la Fournaise","le Puy de Dôme"],"En 79 après J.-C., l'éruption du <b>Vésuve</b> a recouvert Pompéi de cendres."],
+ ["Où se trouve le Piton de la Fournaise, un volcan très actif ?","à La Réunion",["en Bretagne","à Paris","en Corse"],"Le <b>Piton de la Fournaise</b> est à <b>La Réunion</b>. Ses éruptions sont effusives."],
+ ["Dans quelle région de France métropolitaine trouve-t-on la chaîne des Puys ?","en Auvergne",["en Normandie","en Provence","en Alsace"],"La <b>chaîne des Puys</b>, en Auvergne, compte environ 80 volcans endormis."],
+ ["Un volcan qui n'a pas eu d'éruption depuis très longtemps mais pourrait se réveiller est…","endormi",["éteint pour toujours","en éruption","imaginaire"],"Un volcan <b>endormi</b> peut se réveiller. Un volcan <b>éteint</b> ne le fera plus."],
+ ["Pourquoi les volcans se trouvent-ils souvent au bord des plaques ?","parce que les plaques bougent et laissent remonter le magma",["parce qu'il y fait plus chaud au soleil","parce que la mer les attire","c'est un hasard"],"La surface de la Terre est faite de <b>plaques</b> qui bougent. À leurs limites, le magma peut remonter."],
+ ["Qui étudie les volcans ?","un volcanologue",["un astronome","un archéologue","un météorologue"],"Le <b>volcanologue</b> surveille les volcans pour prévenir les habitants."],
+ ["Comment protège-t-on les habitants près d'un volcan actif ?","on le surveille et on évacue si une éruption arrive",["on bouche le cratère","on arrose la lave","on ne peut rien faire"],"On <b>surveille</b> le volcan (secousses, gaz, gonflement) et on <b>évacue</b> les habitants si besoin."],
+ ["Pourquoi la terre autour de certains volcans est-elle très fertile ?","les cendres apportent des minéraux",["il pleut de l'engrais","la lave arrose les champs","il n'y a jamais d'hiver"],"Les <b>cendres volcaniques</b> sont riches en minéraux : les plantes y poussent bien."],
+ ["Quel phénomène est souvent lié aux volcans et fait trembler le sol ?","un séisme",["une marée","une éclipse","un arc-en-ciel"],"Les <b>séismes</b> (tremblements de terre) viennent aussi des mouvements des plaques."],
+];
+/* ============ DOUBLES ET MOITIÉS ============ */
+function genDoubles(){
+  const r=Math.random(), kind=r<.4?'dbl':r<.8?'moi':'pb';
+  if(kind==='dbl'){
+    const n=pick([ri(11,49),ri(51,99),ri(110,490),ri(12,48)*5,ri(12,99)/10]);
+    const d=Math.round(n*2*10)/10, t=Math.floor(n/10)*10, u=Math.round((n-t)*10)/10;
+    return {key:'db'+n,type:'num',kicker:'Doubles',prompt:`Quel est le <b>double</b> de :<div class="big">${fmt(n)}</div>`,answer:d,
+      explain:`Le double de ${fmt(n)}, c'est ${fmt(n)} × 2 = <b>${fmt(d)}</b>.<div class="rule">Je décompose : ${fmt(t)} + ${fmt(u)}. Double de ${fmt(t)} = ${fmt(t*2)}, double de ${fmt(u)} = ${fmt(Math.round(u*20)/10)}. Puis j'ajoute : ${fmt(t*2)} + ${fmt(Math.round(u*20)/10)} = ${fmt(d)}.</div>`};
+  }
+  if(kind==='moi'){
+    const n=pick([ri(11,49)*2,ri(51,99)*2,ri(55,495)*2,ri(11,49)*2+1]);
+    const m=n/2, t=Math.floor(n/10)*10, u=n-t, tEven=t%20===0;
+    const det=tEven?`${fmt(n)} = ${fmt(t)} + ${u}. Moitié de ${fmt(t)} = ${fmt(t/2)}, moitié de ${u} = ${fmt(u/2)}. Total : ${fmt(m)}.`
+      :`${fmt(n)} = ${fmt(t-10)} + ${u+10}. Moitié de ${fmt(t-10)} = ${fmt((t-10)/2)}, moitié de ${u+10} = ${fmt((u+10)/2)}. Total : ${fmt(m)}.`;
+    return {key:'mo'+n,type:'num',kicker:'Moitiés',prompt:`Quelle est la <b>moitié</b> de :<div class="big">${fmt(n)}</div>`,answer:m,
+      explain:`La moitié de ${fmt(n)}, c'est ${fmt(n)} ÷ 2 = <b>${fmt(m)}</b>.<div class="rule">Je décompose en nombres faciles à partager : ${det}</div>${n%2?'<div class="rule">Le nombre est impair : la moitié tombe sur <b>,5</b>.</div>':''}`};
+  }
+  const p=pick([['Léa a',' billes. Son frère en a le double. Combien de billes a son frère ?',true],['Un livre coûte',' €. Pendant les soldes, il coûte la moitié. Combien coûte-t-il ?',false],['Un club a',' licenciés. L\'an prochain, il espère en avoir deux fois plus. Combien en espère-t-il ?',true],['Une course fait',' m. Lila en a couru la moitié. Combien de mètres a-t-elle couru ?',false]]);
+  const n=p[2]?ri(14,98):ri(7,49)*2, a=p[2]?n*2:n/2;
+  return {key:'dp'+p[0]+n,type:'num',kicker:'Problème',prompt:`${p[0]} <b>${fmt(n)}</b>${p[1]}`,answer:a,
+    explain:`${p[2]?'Deux fois plus = le <b>double</b>':'La <b>moitié</b> = je partage en 2'} : ${fmt(n)} ${p[2]?'× 2':'÷ 2'} = <b>${fmt(a)}</b>.`};
+}
+
+/* ============ ONGLETS : Cours · Exercices · Révision · Récompenses ============ */
+let TAB=(()=>{try{return localStorage.getItem(KEY+'-tab')||'ex'}catch(e){return 'ex'}})();
+const SUBN={fr:'Français',ma:'Maths',mo:'Monde & sciences',en:'Anglais'};
+function coursPanel(){
+  const has=m=>(typeof MEMO!=='undefined'&&MEMO[m.id])||(typeof METHODS!=='undefined'&&METHODS[m.id]);
+  return Object.entries(SUBN).map(([sub,title])=>{const ms=MODS.filter(m=>m.sub===sub&&!m.custom&&has(m));if(!ms.length)return '';
+    return `<section class="atelier ${sub}"><div class="atelier-head"><h2>${title}</h2></div><div class="tiles">${ms.map(m=>`<button class="tile" data-act="cours" data-id="${m.id}"><span class="glyph">${m.glyph}</span><div><h3>${m.name}</h3><p>La leçon et la méthode</p></div></button>`).join('')}</div></section>`}).join('')
+    ||'<p class="sub">Les fiches de cours arrivent bientôt.</p>';
+}
+function coursScreen(id){
+  const m=MODS.find(x=>x.id===id);if(!m)return home();G=null;keyHandler=null;setAccent(m.sub);
+  const memo=(typeof MEMO!=='undefined'&&MEMO[id])||'', meth=(typeof METHODS!=='undefined'&&METHODS[id])||'';
+  $app.innerHTML=`<div class="top"><button class="iconbtn" data-act="home">← Retour</button><div class="title">${m.name}</div></div>
+  <div class="qcard cours">${memo}${meth?`<h3>La méthode</h3><p>${meth}</p>`:''}
+   <div class="row" style="justify-content:flex-start;margin-top:14px"><button class="btn" data-act="open" data-id="${id}">Je m'entraîne</button></div></div>`;
+  window.scrollTo(0,0);
+}
+function applyTabs(){
+  const app=$app, par=app.querySelector('p.parents');
+  const T=[['cours','📚 Cours'],['ex','✏️ Exercices'],['rev','🔁 Révision'],['rec','⭐ Récompenses']];
+  const bar=document.createElement('div');bar.className='tabbar';bar.setAttribute('role','tablist');
+  bar.innerHTML=T.map(([k,l])=>`<button class="tabb ${k===TAB?'on':''}" role="tab" aria-selected="${k===TAB}" data-act="tab" data-t="${k}">${l}</button>`).join('');
+  const P_={};T.forEach(([k])=>{const d=document.createElement('div');d.className='tabp';d.hidden=k!==TAB;P_[k]=d});
+  app.querySelectorAll('section.atelier').forEach(s=>P_.ex.appendChild(s));
+  const car=app.querySelector('.carnet');
+  if(car)P_.rev.appendChild(car);else P_.rev.insertAdjacentHTML('beforeend','<section class="goal"><h2>Mon carnet de révision</h2><p style="margin:0">Aucune erreur à revoir pour l’instant. Bravo !</p></section>');
+  const cust=[...P_.ex.querySelectorAll('.tile[data-id^="c_"]')];
+  if(cust.length){const s=document.createElement('section');s.className='atelier mo';s.innerHTML='<div class="atelier-head"><h2>Mes révisions préparées</h2></div><div class="tiles"></div>';cust.forEach(t=>s.querySelector('.tiles').appendChild(t));P_.rev.appendChild(s)}
+  P_.ex.querySelectorAll('section.atelier').forEach(s=>{if(!s.querySelector('.tile'))s.remove()});
+  app.querySelectorAll('section.album').forEach(s=>P_.rec.appendChild(s));
+  P_.cours.innerHTML=coursPanel();
+  app.insertBefore(bar,par);T.forEach(([k])=>app.insertBefore(P_[k],par));
+}
+
 const MODS=[
  {id:'conj',sub:'fr',name:'Conjugaison',desc:'Présent, futur, imparfait, passé composé',glyph:'je…',gen:genConj},
  {id:'nature',sub:'fr',name:'Nature des mots',desc:'Nom, verbe, adjectif, adverbe…',glyph:'Aa',gen:genNature},
@@ -1266,16 +1351,20 @@ const MODS=[
  {id:'accords',sub:'fr',name:'Les accords',desc:'Pluriels, féminins, sujet-verbe',glyph:'-s',gen:genAccords},
  {id:'ligne',sub:'ma',name:'Ligne graduée',desc:'Trouver le pas et placer les nombres',glyph:'|·|',gen:genLigne},
  {id:'poser',sub:'ma',name:'Opérations posées',desc:'Addition, soustraction, multiplication',glyph:'+−×',gen:genPoser},
+ {id:'doubles',sub:'ma',name:'Doubles et moitiés',desc:'× 2 et ÷ 2 de tête, petits problèmes',glyph:'×2',gen:genDoubles},
  {id:'tables',sub:'ma',name:'Tables',desc:'Entraînement et défi chrono',glyph:'7×8',gen:genTables},
  {id:'mental',sub:'ma',name:'Calcul mental',desc:'Les astuces pour calculer vite',glyph:'+9',gen:genMental},
  {id:'sciences',sub:'mo',name:'Sciences',desc:'Corps humain, planètes, eau, vivant, énergie',glyph:'H₂O',gen:genSci},
  {id:'histoire',sub:'mo',name:'Histoire',desc:'Des Gaulois à Napoléon, frise chronologique',glyph:'800',gen:genHist},
  {id:'geo',sub:'mo',name:'Géographie',desc:'Habiter, travailler, consommer en France',glyph:'N↑',gen:genGeo},
  {id:'cartes',sub:'mo',name:'Cartes',desc:'Explore et touche la carte de France et du monde',glyph:'◎',gen:genCarte},
+ {id:'volcans',sub:'mo',name:'Les volcans',desc:'Éruptions, lave, magma, séismes',glyph:'🌋',gen:()=>genQCM(VOLC,'Les volcans','v')},
  {id:'corps',sub:'mo',name:'Le corps humain',desc:'Os, muscles, organes, les sens',glyph:'♥',gen:genAnat},
  {id:'anglais',sub:'en',name:'Anglais',desc:'Mots, phrases et petite grammaire, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 const METHODS={
+ volcans:"Je repère le mot clé (magma, lave, cratère…) et je me représente le volcan en coupe, du bas vers le haut : chambre → cheminée → cratère.",
+ doubles:"Je décompose le nombre en dizaines et unités, je fais le double (ou la moitié) de chaque partie, puis j'additionne.",
  anglais:"1. J'appuie sur <b>Écouter</b> et je répète le mot à voix haute.<br>2. Je cherche s'il ressemble à un mot français (dinosaur, banana…).<br>3. J'élimine les réponses que je connais déjà.",
  corps:"Je pense à mon propre corps : je peux toucher, plier, écouter mon cœur. Puis j'élimine les réponses impossibles.",
  conj:"1. Je repère le <b>temps</b> demandé (présent, futur, imparfait, passé composé).<br>2. Je repère la <b>personne</b> (je, tu, il, nous, vous, ils).<br>3. Je prends la terminaison de ce temps pour cette personne.<br>4. Je vérifie : tu → <b>s</b>, nous → <b>ons</b>, vous → <b>ez</b>, ils → <b>nt</b>.",
@@ -1353,6 +1442,7 @@ function home(){
    <div class="coll">${SQ.map((s,i)=>i<u?`<div class="cslot ${i===P.companion?'comp':''}">${squishy(i,'idle','','data-comp="1"')}<small>${s.n}${i===P.companion?' ♥':''}</small></div>`:`<div class="cslot">${squishy(i,'idle','locked')}<small>${i*PER} ★</small></div>`).join('')}</div>
    <div class="sub" style="margin-top:8px">Record au défi chrono des tables : <b>${P.chrono}</b> bonnes réponses en 60 secondes.</div></section>
   <p class="parents">Pour les parents : une partie = 10 questions. Le temps compte seulement quand Lila joue. ${window.SYNC?window.SYNC.badge():''} <button class="linkbtn" data-act="parent">Espace parents</button></p>`;
+  applyTabs();
   checkRewards();
 }
 
@@ -1754,6 +1844,8 @@ document.addEventListener('click',e=>{
   if(sq&&!e.target.closest('[data-act]')){poke(sq,'squish','happy');sBoing();
     if(sq.dataset.comp){P.companion=+sq.dataset.sq;save();setTimeout(home,500)}return}
   const t=e.target.closest('[data-act]');if(!t)return;const a=t.dataset.act;
+  if(a==='tab'){TAB=t.dataset.t;try{localStorage.setItem(KEY+'-tab',TAB)}catch(_){};home();return}
+  if(a==='cours'){coursScreen(t.dataset.id);return}
   if(a==='open'){const id=t.dataset.id;if(id==='calc'&&typeof openCalc==='function')openCalc();else if(typeof LEVELS!=='undefined'&&LEVELS[id])levelSetup(id);else id==='tables'?tablesSetup():id==='cartes'?cartesSetup():start(id)}
   else if(a==='calc')openCalc();
   else if(a==='calcclose')closeCalc();
