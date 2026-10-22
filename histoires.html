@@ -34,6 +34,7 @@
 .book i:nth-child(2){animation-delay:.3s;background:var(--fr)}.book i:nth-child(3){animation-delay:.6s;background:var(--sun)}
 @keyframes flip{0%{transform:perspective(300px) rotateY(0)}50%{transform:perspective(300px) rotateY(-160deg)}100%{transform:perspective(300px) rotateY(-180deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){.book i{animation:none}}
+.illuswrap{margin:12px 0}.illus{display:block;width:100%;height:auto;border-radius:18px;border:3px solid var(--line);background:#fff}
 </style>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -88,13 +89,13 @@ function summary(){
   $('#edit').onclick=()=>{STEP=0;wizard()};$('#write').onclick=generate;
 }
 async function generate(){
-  main.innerHTML=`<div class="loading"><div class="book"><i></i><i></i><i></i></div><h2>J'écris ton histoire…</h2><p class="sub">Cela prend environ 20 secondes.</p></div>`;
+  main.innerHTML=`<div class="loading"><div class="book"><i></i><i></i><i></i></div><h2>J'écris ton histoire…</h2><p class="sub">Cela prend environ une minute : j'écris et je dessine.</p></div>`;
   try{
     const {data,error}=await SB.functions.invoke('story',{body:{child:SLUG,params:ANS}});
     if(error){let d='';try{const b=await error.context.json();d=[b.error,b.detail,b.message].filter(Boolean).join(' : ');}catch(_){d=error.message||'';}throw new Error(d||'erreur');}
     if(!data||data.error)throw new Error([data&&data.error,data&&data.detail].filter(Boolean).join(' : ')||'erreur');
     STORY=data;
-    const {data:ins}=await SB.from('stories').insert({child_id:KID.id,params:ANS,title:data.title,pages:data.pages,glossary:data.glossary,questions:data.questions}).select('id').single();
+    const {data:ins}=await SB.from('stories').insert({child_id:KID.id,params:ANS,title:data.title,pages:data.pages,glossary:data.glossary,questions:data.questions,illustrations:data.illustrations||[]}).select('id').single();
     STORY_ID=ins?ins.id:null;PAGE=0;ACTIVE_MS=0;read();
   }catch(e){
     main.innerHTML=`<div class="card"><h2>Oups, l'histoire n'a pas pu être écrite.</h2><p>Vérifie la connexion internet, puis réessaie. Si ça recommence, demande à un parent de regarder le guide (étape 4 : fonction « story »).</p>
@@ -110,13 +111,23 @@ function withGlossary(text){
     html=html.replace(re,(m,a,b)=>`${a}<button class="gw" data-g="${i}">${b}</button>`)});
   return html.split(/\n+/).map(p=>`<p>${p}</p>`).join('');
 }
+/* Illustrations SVG écrites par l'IA : on ne garde que des formes de dessin (aucun script, lien ni image externe) */
+const SVG_OK=new Set(['svg','g','path','circle','ellipse','rect','polygon','polyline','line','defs','lineargradient','radialgradient','stop']);
+const ATTR_OK=/^(viewbox|xmlns|d|cx|cy|r|rx|ry|x|y|x1|y1|x2|y2|width|height|points|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|opacity|fill-opacity|stroke-opacity|transform|id|offset|stop-color|stop-opacity|gradientunits|fill-rule)$/i;
+function cleanSvg(src){try{
+  const doc=new DOMParser().parseFromString(src,'image/svg+xml'),root=doc.documentElement;if(!root||root.nodeName.toLowerCase()!=='svg')return '';
+  const walk=el=>{[...el.children].forEach(c=>{if(!SVG_OK.has(c.nodeName.toLowerCase()))c.remove();else walk(c)});
+    [...el.attributes].forEach(a=>{const v=a.value||'';if(!ATTR_OK.test(a.name)||/javascript:|url\((?!#)/i.test(v))el.removeAttribute(a.name)})};
+  walk(root);root.setAttribute('class','illus');root.removeAttribute('width');root.removeAttribute('height');
+  return new XMLSerializer().serializeToString(root)}catch(e){return ''}}
+function illusFor(page){return (STORY.illustrations||[]).filter(x=>x.page===page).map(x=>`<div class="illuswrap">${cleanSvg(x.svg)}</div>`).join('')}
 function read(){
   speechSynthesis&&speechSynthesis.cancel&&speechSynthesis.cancel();
   const n=STORY.pages.length;
   main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>${esc(STORY.title)}</h1><button class="btn ghost" id="lib">Bibliothèque</button></div>
   <div class="kicker">Page ${PAGE+1} sur ${n}</div>
   <div class="tts">${'speechSynthesis' in window?`<button class="btn mo" id="say">Lire à voix haute</button><button class="btn ghost" id="stop">Stop</button><label style="margin:0;font-weight:400">Vitesse <input id="rate" type="range" min="0.6" max="1.1" step="0.05" value="${localStorage.getItem('tts-rate')||0.85}"></label>`:''}</div>
-  <div class="card reader ${SLUG==='jade'?'small':''}">${withGlossary(STORY.pages[PAGE])}</div><div id="def"></div>
+  ${illusFor(PAGE)}<div class="card reader ${/^CM/.test(KID&&KID.grade||'')?'small':''}">${withGlossary(STORY.pages[PAGE])}</div><div id="def"></div>
   <p class="sub">Les mots surlignés sont expliqués : touche-les !</p>
   <div class="row" style="margin-top:10px">${PAGE?'<button class="btn ghost" id="prev">← Page précédente</button>':''}<button class="btn mo" id="nextp">${PAGE<n-1?'Page suivante →':'Répondre aux questions'}</button></div>`;
   document.querySelectorAll('.gw').forEach(b=>b.onclick=()=>{const g=STORY.glossary[+b.dataset.g];$('#def').innerHTML=`<div class="def"><b>${esc(g.mot)}</b> : ${esc(g.definition)}</div>`});
@@ -161,7 +172,7 @@ async function finish(){
 }
 async function openStory(id){
   const {data}=await SB.from('stories').select('*').eq('id',id).maybeSingle();
-  if(!data)return start();STORY={title:data.title,pages:data.pages,glossary:data.glossary||[],questions:data.questions||[]};STORY_ID=data.id;PAGE=0;ACTIVE_MS=0;read();
+  if(!data)return start();STORY={title:data.title,pages:data.pages,glossary:data.glossary||[],questions:data.questions||[],illustrations:data.illustrations||[]};STORY_ID=data.id;PAGE=0;ACTIVE_MS=0;read();
 }
 async function start(){
   STORY=null;
