@@ -4,7 +4,14 @@ const CONFIGURED=!!(CFG.supabaseUrl&&CFG.supabaseAnonKey&&!/VOTRE|xxxx/i.test(CF
 const SB=(CONFIGURED&&window.supabase)?window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey):null;
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const APP_KEYS={jade:'jade-atelier-v2',mael:'mael-quete-v1'};
+const APP_KEYS={jade:'jade-atelier-v2',mael:'mael-quete-v1',lanahee:'lanahee-royaume-v1',lila:'lila-club-v1'};
+// Les ateliers existants : une page par enfant
+const ATELIERS={
+  jade:{first_name:'Jade',grade:'CM2',page:'jade.html',btn:'Mon atelier',cls:'fr'},
+  mael:{first_name:'Mael',grade:'CE1',page:'mael.html',btn:'Ma quête',cls:''},
+  lila:{first_name:'Lila',grade:'CM1',page:'lila.html',btn:'Mon club',cls:'fr'},
+  lanahee:{first_name:'Lanahée',grade:'CP',page:'lanahee.html',btn:'Mon royaume',cls:''}
+};
 async function currentUser(){if(!SB)return null;const {data:{session}}=await SB.auth.getSession();return session?session.user:null}
 async function myFamily(){
   if(!SB)return null;
@@ -19,7 +26,7 @@ async function myChildren(){
 }
 function needConfig(el){
   el.innerHTML=`<div class="card"><h2>Presque prêt !</h2><p>Le site n'est pas encore relié à votre base Supabase. Ouvrez le fichier <b>config.js</b> et collez-y l'adresse et la clé de votre projet (voir le guide, étape 2).</p>
-  <p class="sub">En attendant, les ateliers marchent déjà sur cet appareil : <a href="jade.html">Atelier de Jade</a> · <a href="mael.html">Quête de Mael</a></p></div>`;
+  <p class="sub">En attendant, les ateliers marchent déjà sur cet appareil.</p></div>`;
 }
 function download(name,text,type){
   const blob=new Blob([text],{type:type||'application/json'});const a=document.createElement('a');

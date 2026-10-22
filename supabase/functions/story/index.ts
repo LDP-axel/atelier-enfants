@@ -38,9 +38,13 @@ Deno.serve(async (req) => {
     const grade = kids[0].grade;
     const p = Object.fromEntries(Object.entries(body.params ?? {}).map(([k, v]) => [k, clean(v)]));
 
-    const level = grade === "CE1"
-      ? `Lecteur de CE1 (7 ans) qui apprend encore à bien lire. 3 pages, chaque page 100 à 150 mots (300 à 450 mots au total). Phrases courtes (8 à 12 mots), mots simples et courants, présent de l'indicatif surtout. Peu de dialogues, toujours introduits clairement. 5 mots de vocabulaire à expliquer. 4 questions de compréhension très simples (qui ? où ? quoi ? pourquoi ?).`
-      : `Lectrice de CM2 (10 ans), bonne lectrice. 3 pages, chaque page 220 à 300 mots (650 à 900 mots au total). Vocabulaire riche mais compréhensible, des dialogues, imparfait et passé simple. 7 mots de vocabulaire à expliquer. 5 questions de compréhension dont au moins 2 qui demandent de réfléchir (déduire, expliquer un sentiment).`;
+    const LEVELS: Record<string, string> = {
+      CP: `Lectrice ou lecteur de CP (6 ans) qui apprend à lire. 3 pages, chaque page 50 à 80 mots. Phrases très courtes (5 à 8 mots), mots simples avec des sons déjà connus, présent de l'indicatif. Très peu de dialogues. 4 mots de vocabulaire à expliquer. 3 questions de compréhension très simples (qui ? où ? quoi ?).`,
+      CE1: `Lecteur de CE1 (7 ans) qui apprend encore à bien lire. 3 pages, chaque page 100 à 150 mots (300 à 450 mots au total). Phrases courtes (8 à 12 mots), mots simples et courants, présent de l'indicatif surtout. Peu de dialogues, toujours introduits clairement. 5 mots de vocabulaire à expliquer. 4 questions de compréhension très simples (qui ? où ? quoi ? pourquoi ?).`,
+      CM1: `Lectrice de CM1 (9 ans), bonne lectrice. 3 pages, chaque page 180 à 250 mots. Vocabulaire riche mais compréhensible, des dialogues, imparfait et passé simple. 6 mots de vocabulaire à expliquer. 5 questions de compréhension dont au moins 2 qui demandent de réfléchir.`,
+      CM2: `Lectrice de CM2 (10 ans), bonne lectrice. 3 pages, chaque page 220 à 300 mots (650 à 900 mots au total). Vocabulaire riche mais compréhensible, des dialogues, imparfait et passé simple. 7 mots de vocabulaire à expliquer. 5 questions de compréhension dont au moins 2 qui demandent de réfléchir (déduire, expliquer un sentiment).`,
+    };
+    const level = LEVELS[grade] ?? LEVELS.CE1;
 
     const prompt = `Écris une histoire avec ces choix de l'enfant :
 - Héros ou héroïne : ${p.heros || "un enfant courageux"}

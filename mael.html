@@ -2237,6 +2237,18 @@ document.addEventListener('keydown',e=>{
 });
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
 window.getP=()=>P;
+/* Modules créés par les parents (Espace parents → Créer un module) */
+window.onCustomModules=function(list){
+  list.forEach(cm=>{
+    const id='c_'+cm.id.slice(0,8);if(MODS.some(m=>m.id===id))return;
+    const qs=(cm.questions||[]).filter(q=>q&&q.question&&Array.isArray(q.options)&&q.options.length>1);if(!qs.length)return;
+    MODS.push({id,sub:['fr','ma','mo','en'].includes(cm.subject)?cm.subject:'mo',name:cm.title,desc:cm.description||'Créé pour toi',glyph:'✦',custom:true,
+      gen:()=>{const q=pick(qs),good=q.options[q.answer||0];
+        return {key:id+q.question,type:'choice',kicker:cm.title,prompt:`<div class="big" style="font-size:1.45rem">${esc(q.question)}</div>`+(q.ecouter?enBtn(q.ecouter):''),
+          options:shuffle(q.options.slice()),answer:good,explain:(q.explication?esc(q.explication):`La bonne réponse est <b>${esc(good)}</b>.`)+(q.ecouter?`<div style="margin-top:8px">${enBtn(q.ecouter)}</div>`:'')}}});
+  });
+  if(!G)home();
+};
 window.onRemoteState=function(st){P=Object.assign({},P,st);P.set=Object.assign({},DEF_SET,st.set||{});try{localStorage.setItem(KEY,JSON.stringify(P))}catch(e){};if(!G)home()};
 home();
 if(window.SYNC)window.SYNC.init();

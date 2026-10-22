@@ -15,14 +15,14 @@
 <script>
 const main=$('#main');
 function loginView(msg='',cls=''){
-  main.innerHTML=`<h1>L'Atelier des enfants</h1><p class="sub">Espace famille de Jade et Mael. Connexion réservée aux parents.</p>
+  main.innerHTML=`<h1>L'Atelier des enfants</h1><p class="sub">Espace famille. Connexion réservée aux parents.</p>
   <div class="card"><h2>Se connecter</h2>
    <form id="f"><label>Adresse e-mail<input id="em" type="email" autocomplete="email" required></label>
    <label>Mot de passe<input id="pw" type="password" autocomplete="current-password" minlength="8" required></label>
    <div class="row" style="margin-top:14px"><button class="btn" type="submit">Se connecter</button><button class="btn ghost" type="button" id="su">Créer mon compte parent</button></div>
    <p><button class="btn ghost" type="button" id="fg" style="min-height:0;padding:6px 12px;font-size:.9rem">Mot de passe oublié</button></p>
    <div id="m" class="msg ${cls}">${msg}</div></form></div>
-  <p class="sub">Sans connexion, les ateliers marchent quand même sur cet appareil : <a href="jade.html">Atelier de Jade</a> · <a href="mael.html">Quête de Mael</a></p>`;
+  <p class="sub">Sans connexion, chaque atelier marche quand même sur l'appareil, sans sauvegarde en ligne.</p>`;
   const em=()=>$('#em').value.trim(), pw=()=>$('#pw').value;
   $('#f').onsubmit=async e=>{e.preventDefault();const {error}=await SB.auth.signInWithPassword({email:em(),password:pw()});
     if(error){$('#m').className='msg err';$('#m').textContent=error.message.includes('confirm')?'Confirmez d’abord votre adresse avec le lien reçu par e-mail.':'E-mail ou mot de passe incorrect.'}else route()};
@@ -43,17 +43,21 @@ async function route(){
   const user=await currentUser();if(!user)return loginView();
   const fam=await myFamily();
   if(!fam){
-    main.innerHTML=`<h1>Bienvenue !</h1><div class="card"><h2>Créer votre espace famille</h2><p>Je crée la famille avec les profils de <b>Jade (CM2)</b> et <b>Mael (CE1)</b>. Ensuite, vous pourrez inviter leur maman depuis l'espace parents.</p>
-     <p class="sub">Si leur maman vous a déjà invité, déconnectez-vous et reconnectez-vous : l'invitation sera acceptée automatiquement.</p>
+    main.innerHTML=`<h1>Bienvenue !</h1><div class="card"><h2>Créer votre espace famille</h2><p>Cochez les ateliers de vos enfants. Ensuite, vous pourrez inviter l'autre parent depuis l'espace parents.</p>
+     <div class="kidpick">${Object.entries(ATELIERS).map(([slug,a])=>`<label class="ck"><input type="checkbox" value="${slug}"> ${esc(a.first_name)} (${esc(a.grade)})</label>`).join('')}</div>
+     <p class="sub">Si l'autre parent vous a déjà invité, déconnectez-vous et reconnectez-vous : l'invitation sera acceptée automatiquement.</p>
      <div class="row"><button class="btn" id="mk">Créer la famille</button><button class="btn ghost" id="out">Se déconnecter</button></div><div id="m" class="msg"></div></div>`;
-    $('#mk').onclick=async()=>{const {error}=await SB.rpc('setup_family',{p_name:'Famille'});if(error){$('#m').className='msg err';$('#m').textContent=error.message}else route()};
+    $('#mk').onclick=async()=>{const slugs=[...document.querySelectorAll('.kidpick input:checked')].map(i=>i.value);
+      if(!slugs.length){$('#m').className='msg err';$('#m').textContent='Cochez au moins un enfant.';return}
+      const kids=slugs.map(s=>({slug:s,first_name:ATELIERS[s].first_name,grade:ATELIERS[s].grade}));
+      const {error}=await SB.rpc('setup_family',{p_name:'Famille',p_kids:kids});if(error){$('#m').className='msg err';$('#m').textContent=error.message}else route()};
     $('#out').onclick=async()=>{await SB.auth.signOut();route()};
     return;
   }
   const kids=await myChildren();
   main.innerHTML=`<h1>Qui joue aujourd'hui ?</h1><p class="sub">Connecté : ${esc(user.email)}. Tout ce que font les enfants est sauvegardé en ligne.</p>
    <div class="kids">${kids.map(k=>`<div class="kid ${esc(k.slug)}"><h2>${esc(k.first_name)}</h2><div class="sub">${esc(k.grade)}</div>
-     <a class="btn ${k.slug==='jade'?'fr':''}" href="${k.slug==='jade'?'jade.html':'mael.html'}">${k.slug==='jade'?'Mon atelier':'Ma quête'}</a>
+     ${ATELIERS[k.slug]?`<a class="btn ${ATELIERS[k.slug].cls}" href="${ATELIERS[k.slug].page}">${ATELIERS[k.slug].btn}</a>`:''}
      <a class="btn mo" href="histoires.html?enfant=${encodeURIComponent(k.slug)}">Atelier d'histoires</a></div>`).join('')}</div>
    <div class="card"><div class="row"><a class="btn ghost" href="parents.html">Espace parents</a><button class="btn ghost" id="out">Se déconnecter</button></div></div>`;
   $('#out').onclick=async()=>{await SB.auth.signOut();route()};

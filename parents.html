@@ -14,7 +14,7 @@
 <main id="main"><p class="sub">Chargement…</p></main>
 <script>
 const main=$('#main');
-const MODNAMES={conj:'Conjugaison',nature:'Nature des mots',phrase:'Sujet & verbe',accords:'Accords',ligne:'Ligne graduée',poser:'Opérations posées',tables:'Tables',mental:'Calcul mental',sciences:'Sciences',histoire:'Histoire',geo:'Géographie',cartes:'Cartes',ortho:'Orthographe',vocab:'Vocabulaire',nombres:'Nombres',problemes:'Problèmes',mesures:'Heure & mesures',monde:'Questionner le monde',add:'Additions',sub:'Soustractions',lettres:'Lettres b d p q t',revision:'Révision',histoires:'Histoires'};
+const MODNAMES={conj:'Conjugaison',nature:'Nature des mots',phrase:'Sujet & verbe',accords:'Accords',ligne:'Ligne graduée',poser:'Opérations posées',tables:'Tables',mental:'Calcul mental',sciences:'Sciences',histoire:'Histoire',geo:'Géographie',cartes:'Cartes',ortho:'Orthographe',vocab:'Vocabulaire',nombres:'Nombres',problemes:'Problèmes',mesures:'Heure & mesures',monde:'Questionner le monde',add:'Additions',sub:'Soustractions',lettres:'Lettres b d p q t',revision:'Révision',histoires:'Histoires',anglais:'Anglais',corps:'Le corps humain',sons:'Les sons',syllabes:'Les syllabes',lecture:'Je lis des mots',compter:'Je compte',calc:'Calculette'};
 let FAM=null,KIDS=[],CUR=null,DATA={};
 const dkey=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
 const pctOf=r=>r&&r.q?Math.round(100*r.ok/r.q):0;
@@ -44,13 +44,14 @@ function view(){
    <div class="bars">${days.map(([k,x])=>`<div class="${dayMet(P,x)?'met':''}" style="height:${Math.round(x.ms/maxMs*100)}%" title="${k} : ${Math.floor(x.ms/60000)} min, ${x.q} questions, ${pctOf(x)} %"></div>`).join('')}</div>
    <div class="barlab">${days.map(([k])=>`<span>${k.slice(8)}</span>`).join('')}</div>
    <p>${W?(W.unlocked?`Cadeau de la semaine <b>gagné</b>${W.choice?` · choix : <b>${esc(W.choice)}</b>${W.given?' (remis)':' (à remettre)'}`:''}.`:'Cadeau de la semaine pas encore gagné.'):''}</p></div>
+  <div class="card" id="cmcard"><h2>Modules créés avec l’IA</h2><p class="sub">Chargement…</p></div>
   <div class="card"><h2>Par matière</h2><div class="tablewrap"><table><tr><th>Atelier</th><th>Questions</th><th>Réussite</th><th>Indices utilisés</th><th>Niveau</th></tr>
-   ${Object.entries(mods).sort((a,b)=>b[1].n-a[1].n).map(([m,x])=>`<tr><td>${esc(MODNAMES[m]||m)}</td><td>${x.n}</td><td><span class="pill ${x.ok/x.n>=.7?'ok':'ko'}">${Math.round(100*x.ok/x.n)} %</span></td><td>${x.h}</td><td>${(P.lv||{})[m]||''}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Aucune réponse enregistrée pour l’instant.</td></tr>'}</table></div></div>
+   ${Object.entries(mods).sort((a,b)=>b[1].n-a[1].n).map(([m,x])=>`<tr><td>${esc(modName(m))}</td><td>${x.n}</td><td><span class="pill ${x.ok/x.n>=.7?'ok':'ko'}">${Math.round(100*x.ok/x.n)} %</span></td><td>${x.h}</td><td>${(P.lv||{})[m]||''}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Aucune réponse enregistrée pour l’instant.</td></tr>'}</table></div></div>
   <div class="card"><h2>Carnet d'erreurs à revoir (${(P.carnet||[]).length})</h2><p class="sub">Les questions ratées avec l'explication, pour en parler ensemble.</p>
    ${(P.carnet||[]).slice().reverse().slice(0,40).map(e=>`<details><summary>${esc(MODNAMES[e.q.modId]||e.q.kicker||'')} · ${esc((e.q.prompt||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').slice(0,110))}</summary>
      <p>Sa réponse : <s>${esc(e.given||'')}</s></p><div class="rule">${e.q.explain||''}</div></details>`).join('')||'<p class="sub">Aucune erreur en attente. Bravo !</p>'}</div>
   <div class="card"><h2>Dernières réponses</h2><div class="tablewrap"><table><tr><th>Date</th><th>Atelier</th><th>Question</th><th>Réponse</th><th></th></tr>
-   ${(D.attempts||[]).slice(0,60).map(a=>`<tr><td>${new Date(a.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(MODNAMES[a.module_id]||a.module_id)}</td><td>${esc((a.prompt||'').slice(0,90))}</td><td>${esc(a.given||'')}${a.is_correct?'':' → <b>'+esc(a.answer||'')+'</b>'}${a.hints_used?` <span class="sub">(${a.hints_used} indice${a.hints_used>1?'s':''})</span>`:''}</td><td><span class="pill ${a.is_correct?'ok':'ko'}">${a.is_correct?'✓':'✗'}</span></td></tr>`).join('')}</table></div></div>
+   ${(D.attempts||[]).slice(0,60).map(a=>`<tr><td>${new Date(a.created_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(modName(a.module_id))}</td><td>${esc((a.prompt||'').slice(0,90))}</td><td>${esc(a.given||'')}${a.is_correct?'':' → <b>'+esc(a.answer||'')+'</b>'}${a.hints_used?` <span class="sub">(${a.hints_used} indice${a.hints_used>1?'s':''})</span>`:''}</td><td><span class="pill ${a.is_correct?'ok':'ko'}">${a.is_correct?'✓':'✗'}</span></td></tr>`).join('')}</table></div></div>
   <div class="card"><h2>Histoires</h2>${(D.stories||[]).map(s=>`<p><a href="histoires.html?enfant=${esc(CUR)}&id=${esc(s.id)}">${esc(s.title||'Histoire')}</a> <span class="sub">· ${new Date(s.created_at).toLocaleDateString('fr-FR')}${s.score!=null?` · questions : ${s.score}`:''}</span></p>`).join('')||'<p class="sub">Aucune histoire pour l’instant.</p>'}</div>
   <div class="card"><h2>Sauvegarde</h2><p>Téléchargez toutes les données de ${esc(kid.first_name)} (progression, réponses, histoires).</p>
    <div class="row"><button class="btn" id="xj">Tout télécharger (JSON)</button><button class="btn ghost" id="xc">Réponses en tableur (CSV)</button></div></div>`}`;
@@ -61,23 +62,67 @@ function view(){
     $('#xc').onclick=async()=>{const {data:all}=await SB.from('attempts').select('created_at,module_id,prompt,given,answer,is_correct,hints_used').eq('child_id',kid.id).order('created_at');
       const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const rows=[['date','atelier','question','reponse_donnee','bonne_reponse','juste','indices']].concat((all||[]).map(a=>[a.created_at,MODNAMES[a.module_id]||a.module_id,a.prompt,a.given,a.answer,a.is_correct?'oui':'non',a.hints_used]));
       download(`reponses-${CUR}-${dkey(new Date())}.csv`,'﻿'+rows.map(r=>r.map(q).join(';')).join('\n'),'text/csv')};
+    cmBind(kid);
   } else famBind();
 }
 function famView(){
-  return `<div class="card"><h2>Inviter leur maman (ou un autre parent)</h2><p>Entrez son adresse e-mail. Elle crée ensuite son compte sur la page d'accueil du site avec <b>cette même adresse</b> : elle rejoint automatiquement la famille et voit tout.</p>
+  return `<div class="card"><h2>Inviter l’autre parent</h2><p>Entrez son adresse e-mail. Il ou elle crée ensuite son compte sur la page d'accueil du site avec <b>cette même adresse</b> et rejoint automatiquement la famille.</p>
    <form id="inv"><label>E-mail<input id="ie" type="email" required></label><div class="row" style="margin-top:12px"><button class="btn" type="submit">Inviter</button></div><div id="im" class="msg"></div></form>
    <div id="pend" class="sub" style="margin-top:10px"></div></div>
-  <div class="card"><h2>Sauvegarde complète</h2><p>Un seul fichier avec les données des deux enfants.</p><button class="btn" id="xall">Tout télécharger</button></div>`;
+  <div class="card"><h2>Sauvegarde complète</h2><p>Un seul fichier avec les données de tous les enfants.</p><button class="btn" id="xall">Tout télécharger</button></div>`;
 }
 async function famBind(){
   const {data:inv}=await SB.from('family_invites').select('email,created_at');
   const {count}=await SB.from('family_members').select('user_id',{count:'exact',head:true});
   $('#pend').innerHTML=`${count||1} parent${(count||1)>1?'s':''} dans la famille.`+((inv||[]).length?` Invitation en attente : ${inv.map(i=>esc(i.email)).join(', ')}.`:'');
   $('#inv').onsubmit=async e=>{e.preventDefault();const {error}=await SB.rpc('invite_parent',{p_family:FAM.id,p_email:$('#ie').value});
-    $('#im').className='msg '+(error?'err':'ok');$('#im').textContent=error?error.message:'Invitation enregistrée. Envoyez-lui l’adresse du site pour qu’elle crée son compte.';famBind()};
+    $('#im').className='msg '+(error?'err':'ok');$('#im').textContent=error?error.message:'Invitation enregistrée. Envoyez-lui l’adresse du site pour créer son compte.';famBind()};
   $('#xall').onclick=async()=>{const out={famille:FAM,date:new Date().toISOString(),enfants:[]};
     for(const k of KIDS){const {data:st}=await SB.from('child_state').select('*').eq('child_id',k.id).maybeSingle();const {data:at}=await SB.from('attempts').select('*').eq('child_id',k.id);const {data:so}=await SB.from('stories').select('*').eq('child_id',k.id);out.enfants.push({enfant:k,etat:st,reponses:at,histoires:so})}
     download(`sauvegarde-famille-${dkey(new Date())}.json`,JSON.stringify(out,null,1))};
+}
+
+/* ---------- Modules créés avec l'IA ---------- */
+const SUBJ={fr:'Français',ma:'Maths',mo:'Monde & sciences',en:'Anglais'};
+let CMS={},DRAFT={};
+const modName=m=>{if(MODNAMES[m])return MODNAMES[m];if(/^c_/.test(m)){for(const l of Object.values(CMS))for(const c of l)if('c_'+c.id.slice(0,8)===m)return c.title+' (créé)'}return m};
+async function cmLoad(kid){const {data}=await SB.from('custom_modules').select('*').eq('child_id',kid.id).order('created_at',{ascending:false});CMS[kid.slug]=data||[]}
+async function cmBind(kid){
+  if(!CMS[kid.slug])await cmLoad(kid);
+  const el=$('#cmcard');if(!el)return;const list=CMS[kid.slug], d=DRAFT[kid.slug];
+  el.innerHTML=`<h2>Modules créés avec l’IA</h2>
+   <p class="sub">Donnez un thème ou collez une leçon de ${esc(kid.first_name)} : l’IA prépare des questions avec explications. Vous relisez, retirez ce qui ne va pas, puis publiez. Le module apparaît dans son atelier au prochain chargement.</p>
+   ${list.length?`<div class="tablewrap"><table><tr><th>Module</th><th>Matière</th><th>Questions</th><th>Visible</th><th></th></tr>${list.map(c=>`<tr><td>${esc(c.title)}</td><td>${esc(SUBJ[c.subject]||c.subject)}</td><td>${(c.questions||[]).length}</td>
+     <td><button class="btn ghost" data-cmpub="${c.id}" style="min-height:0;padding:4px 10px">${c.published?'Oui · masquer':'Non · publier'}</button></td>
+     <td><button class="btn ghost" data-cmdel="${c.id}" style="min-height:0;padding:4px 10px">Supprimer</button></td></tr>`).join('')}</table></div>`:''}
+   ${d&&d.questions?`<div class="card" style="margin-top:12px;background:var(--soft,#f6f8f7)"><h3>Aperçu : ${esc(d.title)} (${d.questions.length} questions)</h3>
+     <p class="sub">La bonne réponse est en gras. Retirez les questions qui ne conviennent pas.</p>
+     ${d.questions.map((q,i)=>`<details open><summary>${i+1}. ${esc(q.question)} <button class="btn ghost" data-qdel="${i}" style="min-height:0;padding:2px 8px;margin-left:6px">Retirer</button></summary>
+       <p>${q.options.map((o,k)=>k===q.answer?`<b>✓ ${esc(o)}</b>`:esc(o)).join(' · ')}</p><p class="sub">${esc(q.explication||'')}${q.ecouter?` · 🔊 « ${esc(q.ecouter)} »`:''}</p></details>`).join('')}
+     <div class="row" style="margin-top:12px"><button class="btn" id="cmpublish">Publier pour ${esc(kid.first_name)}</button><button class="btn ghost" id="cmdrop">Abandonner</button></div><div id="cmm2" class="msg"></div></div>`:''}
+   <form id="cmf" style="margin-top:14px"><label>Titre du module<input id="cmt" maxlength="60" required placeholder="Ex. : Les fractions, Les animaux en anglais, Le Moyen Âge"></label>
+    <label>Matière<select id="cms">${Object.entries(SUBJ).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label>Leçon ou consignes (facultatif)<textarea id="cml" rows="5" maxlength="8000" placeholder="Collez ici le texte de la leçon, ou précisez ce que vous voulez travailler."></textarea></label>
+    <label>Nombre de questions<input id="cmn" type="number" min="4" max="20" value="10"></label>
+    <div class="row" style="margin-top:12px"><button class="btn" type="submit" id="cmgo">Préparer le module</button></div><div id="cmm" class="msg"></div></form>`;
+  el.querySelectorAll('[data-cmdel]').forEach(b=>b.onclick=async()=>{if(!confirm('Supprimer ce module ?'))return;await SB.from('custom_modules').delete().eq('id',b.dataset.cmdel);await cmLoad(kid);cmBind(kid)});
+  el.querySelectorAll('[data-cmpub]').forEach(b=>b.onclick=async()=>{const c=list.find(x=>x.id===b.dataset.cmpub);await SB.from('custom_modules').update({published:!c.published}).eq('id',c.id);await cmLoad(kid);cmBind(kid)});
+  el.querySelectorAll('[data-qdel]').forEach(b=>b.onclick=e=>{e.preventDefault();d.questions.splice(+b.dataset.qdel,1);cmBind(kid)});
+  if(d){
+    $('#cmdrop').onclick=()=>{delete DRAFT[kid.slug];cmBind(kid)};
+    $('#cmpublish').onclick=async()=>{if(!d.questions.length)return;
+      const {error}=await SB.from('custom_modules').insert({family_id:FAM.id,child_id:kid.id,title:d.title,subject:d.subject,description:d.description,questions:d.questions});
+      if(error){$('#cmm2').className='msg err';$('#cmm2').textContent=error.message;return}
+      delete DRAFT[kid.slug];await cmLoad(kid);cmBind(kid)};
+  }
+  $('#cmf').onsubmit=async e=>{e.preventDefault();const go=$('#cmgo'),m=$('#cmm');go.disabled=true;m.className='msg';m.textContent='L’IA prépare les questions… (20 à 40 secondes)';
+    const title=$('#cmt').value.trim(),subject=$('#cms').value;
+    try{
+      const {data,error}=await SB.functions.invoke('module',{body:{child:kid.slug,title,subject,lesson:$('#cml').value,count:+$('#cmn').value}});
+      let msg='';if(error){try{const b=await error.context.json();msg=[b.error,b.detail].filter(Boolean).join(' : ')}catch(_){msg=error.message}}
+      if(msg||!data||data.error){m.className='msg err';m.textContent='Impossible de préparer le module. '+(msg||data&&data.error||'');go.disabled=false;return}
+      DRAFT[kid.slug]={title,subject,description:$('#cml').value.trim()?'D’après ta leçon':'Créé pour toi',questions:data.questions};cmBind(kid);
+    }catch(err){m.className='msg err';m.textContent='Erreur : '+err.message;go.disabled=false}};
 }
 (async()=>{
   if(!SB)return needConfig(main);

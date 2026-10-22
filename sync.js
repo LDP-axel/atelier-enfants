@@ -45,6 +45,9 @@
       const {data,error}=await S.client.from('children').select('id').eq('slug',child).limit(1);
       if(error||!data||!data.length){S.status='nochild';S.paint();return}
       S.childId=data[0].id;
+      // Modules créés par les parents depuis l'Espace parents
+      try{const {data:cm}=await S.client.from('custom_modules').select('id,title,subject,description,questions').eq('child_id',S.childId).eq('published',true).order('created_at');
+        if(cm&&cm.length&&window.onCustomModules)window.onCustomModules(cm)}catch(e){}
       const {data:st}=await S.client.from('child_state').select('state,updated_at').eq('child_id',S.childId).maybeSingle();
       const local=window.getP?window.getP():null, localAt=(local&&local.savedAt)||0;
       const remoteAt=st?new Date(st.updated_at).getTime():0;
