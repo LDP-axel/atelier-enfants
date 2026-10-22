@@ -1,0 +1,21 @@
+{
+ "name": "Jade",
+ "short_name": "Jade",
+ "start_url": "jade.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#E8F3F0",
+ "theme_color": "#0E8F80",
+ "icons": [
+  {
+   "src": "icons/jade-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/jade-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}

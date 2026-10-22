@@ -1,0 +1,21 @@
+{
+ "name": "Lanahée",
+ "short_name": "Lanahée",
+ "start_url": "lanahee.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#E8F3F0",
+ "theme_color": "#0E8F80",
+ "icons": [
+  {
+   "src": "icons/lanahee-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/lanahee-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}

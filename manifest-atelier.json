@@ -1,0 +1,21 @@
+{
+ "name": "L'Atelier des enfants",
+ "short_name": "Atelier",
+ "start_url": "index.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#E8F3F0",
+ "theme_color": "#0E8F80",
+ "icons": [
+  {
+   "src": "icons/atelier-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  },
+  {
+   "src": "icons/atelier-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}
