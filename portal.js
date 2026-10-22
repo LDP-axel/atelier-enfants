@@ -16,12 +16,14 @@ async function currentUser(){if(!SB)return null;const {data:{session}}=await SB.
 async function myFamily(){
   if(!SB)return null;
   try{await SB.rpc('accept_invites')}catch(e){}
-  const {data,error}=await SB.from('family_members').select('family_id,role,families(name)').limit(1);
+  // Un parent peut suivre plusieurs familles : on prend d'abord celle qu'il a créée
+  const {data,error}=await SB.from('family_members').select('family_id,role,created_at,families(name)').order('created_at');
+  if(data)data.sort((a,b)=>(b.role==='owner')-(a.role==='owner'));
   if(error||!data||!data.length)return null;
   return {id:data[0].family_id,role:data[0].role,name:data[0].families?data[0].families.name:'Famille'};
 }
 async function myChildren(){
-  const {data}=await SB.from('children').select('id,slug,first_name,grade').order('slug');
+  const {data}=await SB.from('children').select('id,slug,first_name,grade,family_id').order('slug');
   return data||[];
 }
 function needConfig(el){

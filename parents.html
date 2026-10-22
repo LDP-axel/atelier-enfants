@@ -111,7 +111,7 @@ async function cmBind(kid){
   if(d){
     $('#cmdrop').onclick=()=>{delete DRAFT[kid.slug];cmBind(kid)};
     $('#cmpublish').onclick=async()=>{if(!d.questions.length)return;
-      const {error}=await SB.from('custom_modules').insert({family_id:FAM.id,child_id:kid.id,title:d.title,subject:d.subject,description:d.description,questions:d.questions});
+      const {error}=await SB.from('custom_modules').insert({family_id:kid.family_id,child_id:kid.id,title:d.title,subject:d.subject,description:d.description,questions:d.questions});
       if(error){$('#cmm2').className='msg err';$('#cmm2').textContent=error.message;return}
       delete DRAFT[kid.slug];await cmLoad(kid);cmBind(kid)};
   }
