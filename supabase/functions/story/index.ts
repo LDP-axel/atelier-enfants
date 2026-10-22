@@ -67,7 +67,8 @@ Dans "pages", sépare les paragraphes par un retour à la ligne (\\n). "answer" 
       },
       body: JSON.stringify({
         model: Deno.env.get("STORY_MODEL") || "claude-haiku-5-5",
-        max_tokens: 4000,
+        max_tokens: 16000,
+        thinking: { type: "disabled" },
         system: SYSTEM,
         messages: [{ role: "user", content: prompt }],
       }),
@@ -76,7 +77,7 @@ Dans "pages", sépare les paragraphes par un retour à la ligne (\\n). "answer" 
     if (!r.ok) return json({ error: "Le service d'histoires ne répond pas", detail: j?.error?.message }, 502);
     const text = (j.content ?? []).map((c: { text?: string }) => c.text ?? "").join("");
     const m = text.match(/\{[\s\S]*\}/);
-    if (!m) return json({ error: "Réponse illisible" }, 502);
+    if (!m) return json({ error: "Réponse illisible", detail: `stop=${j.stop_reason}` }, 502);
     const s = JSON.parse(m[0]);
     if (!s.title || !Array.isArray(s.pages) || !s.pages.length || !Array.isArray(s.questions)) return json({ error: "Histoire incomplète" }, 502);
     s.glossary = Array.isArray(s.glossary) ? s.glossary.slice(0, 10) : [];
