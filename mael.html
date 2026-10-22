@@ -1787,7 +1787,7 @@ function renderQ(){
   } else if(q.type==='tick'){
     body=`<div class="qcard">${head}<div class="prompt">${q.prompt}</div><div class="svgwrap" id="lsvg">${lineSVG(q.cfg,null,true)}</div><div class="sub" style="font-size:.9rem">Calcule d'abord le pas, puis touche le bon trait.</div></div>`;
   } else if(q.type==='posed'){
-    G.col=0;G.err=0;G.colErr=0;G.done=[];
+    G.col=0;G.err=0;G.colErr=0;G.done=[];G.auto=false;
     body=`<div class="qcard">${head}<div class="prompt">Calcule en commençant par la droite. Tape chaque chiffre du résultat.</div><div class="posed" id="posed"></div><div class="hint" id="hint" hidden></div></div>${pad(false)}`;
     keyHandler=posedKey;
   } else if(q.type==='hunt'){
@@ -1874,12 +1874,12 @@ function posedKey(v){
   if(G.locked||v==='⌫'||v===','||v==='ok')return;
   const q=G.qs[G.i], st=q.steps[G.done.length], hint=document.getElementById('hint');
   if(+v===st.d){G.done.push(+v);G.colErr=0;hint.hidden=true;beep([[700,.06]]);drawPosed();
-    if(G.done.length===q.steps.length){finish(G.err===0,G.err?`Tu as trouvé le résultat en corrigeant ${G.err} erreur${G.err>1?'s':''} en route. Relis bien les colonnes ci-dessous.`:'')}
+    if(G.done.length===q.steps.length){finish(!G.auto,G.auto?'':G.err?`Bravo, tu t'es corrigé tout seul en route (${G.err} chiffre${G.err>1?'s':''} à reprendre). Relis bien les colonnes ci-dessous.`:'')}
     return;}
   G.err++;G.colErr++;sBad();poke(document.getElementById('mascot'),'sad','sad');
   hint.hidden=false;hint.innerHTML=(G.colErr>=2?'Regarde bien : ':'Pas tout à fait. ')+st.h;
   const act=document.querySelector('.pc.res.act');if(act){act.classList.remove('shake');void act.offsetWidth;act.classList.add('shake')}
-  if(G.colErr>=3){G.done.push(st.d);G.colErr=0;drawPosed();if(G.done.length===q.steps.length)finish(false,'')}
+  if(G.colErr>=3){G.auto=true;G.done.push(st.d);G.colErr=0;drawPosed();if(G.done.length===q.steps.length)finish(false,'')}
 }
 function answerLabel(q){
   if(q.type==='choice'||q.type==='chunksq')return q.answer;
