@@ -1598,7 +1598,7 @@ function genAdd(){
   const s=a+b;
   if(lv<=2&&Math.random()<.2)return {key:'am'+a+b,type:'num',kicker:`Additions · niveau ${lv}`,prompt:`<div class="big">${a} + <span class="hl">?</span> = ${s}</div>`,answer:b,
     hint:`<p>Combien de ronds orange faut-il ajouter aux ${a} ronds bleus pour en avoir ${s} ?</p>${dotsSVG(a,0,'+')}`,explain:`${a} + <b>${b}</b> = ${s}<div class="rule">Je pars de ${a} et je compte jusqu'à ${s} : ${Array.from({length:b},(_,i)=>a+i+1).join(', ')}. J'ai avancé de <b>${b}</b>.</div><div class="svgwrap center vis">${dotsSVG(a,b,'+')}</div>`};
-  return {key:'a'+a+'+'+b,type:'num',kicker:`Additions · niveau ${lv}`,prompt:`<div class="big">${a} + ${b} = <span class="hl">?</span></div>`,answer:s,
+  return {key:'a'+a+'+'+b,calc:{a,b,op:'+'},type:'num',kicker:`Additions · niveau ${lv}`,prompt:`<div class="big">${a} + ${b} = <span class="hl">?</span></div>`,answer:s,
     hint:`<div class="svgwrap center vis">${addSubVisual(a,'+',b)}</div>`,explain:`${a} + ${b} = <b>${s}</b>${addSubDetail(a,'+',b)}`};
 }
 function genSub(){
@@ -1609,7 +1609,7 @@ function genSub(){
   else if(lv===4){if(Math.random()<.5){a=10*ri(2,9)+ri(1,9);b=ri(1,a%10)}else{a=10*ri(3,9)+ri(0,9);b=10*ri(1,Math.floor(a/10)-1)}}
   else {const ta=ri(3,9),tb=ri(1,ta-1),ua=ri(1,9),ub=ri(0,ua);a=ta*10+ua;b=tb*10+ub}
   const r=a-b;
-  return {key:'s'+a+'-'+b,type:'num',kicker:`Soustractions · niveau ${lv}`,prompt:`<div class="big">${a} − ${b} = <span class="hl">?</span></div>`,answer:r,
+  return {key:'s'+a+'-'+b,calc:{a,b,op:'-'},type:'num',kicker:`Soustractions · niveau ${lv}`,prompt:`<div class="big">${a} − ${b} = <span class="hl">?</span></div>`,answer:r,
     hint:`<div class="svgwrap center vis">${addSubVisual(a,'-',b)}</div>`,explain:`${a} − ${b} = <b>${r}</b>${addSubDetail(a,'-',b)}`};
 }
 function levelSetup(id){
@@ -1950,9 +1950,27 @@ function ordTap(k){
   const ok=G.ord.every((k,p)=>sorted[p]===k);
   drawOrder(res);finish(ok,'',G.ord.map(k=>q.events[k][1]).join(' → '));
 }
+/* Rappel adapté aux nombres de la question (et pas un exemple général) */
+function rappelCalc({a,b,op}){
+  const ua=a%10,tb=Math.floor(b/10)*10,ub=b%10,pl=n=>n>1?'s':'';
+  if(op==='+'){const s=a+b;let l;
+    if(b<10){l=ua+b<10?(a<10?`Je pars de ${a} et j'avance de ${b} : ${Array.from({length:b},(_,i)=>a+i+1).join(', ')}. Donc ${a} + ${b} = <b>${s}</b>.`:`Je regarde les unités : ${ua} + ${b} = ${ua+b}. Les dizaines ne bougent pas : ${a} + ${b} = <b>${s}</b>.`)
+      :`Je fais 10 : ${a} + ${10-ua} = ${a+10-ua}. Il reste ${b-(10-ua)} à ajouter : ${a+10-ua} + ${b-(10-ua)} = <b>${s}</b>.`}
+    else if(ub===0)l=`J'ajoute ${b/10} dizaine${pl(b/10)} : ${a} + ${b} = <b>${s}</b>.`;
+    else l=`J'ajoute d'abord les dizaines : ${a} + ${tb} = ${a+tb}. Puis les unités : ${a+tb} + ${ub} = <b>${s}</b>.`;
+    return `<ul><li>${l}</li><li>Je vérifie : ${s} − ${b} = ${a} ✔</li></ul>`}
+  const r=a-b;let l;
+  if(b<10){l=a<=10?`Je pars de ${a} et je recule de ${b} : ${Array.from({length:b},(_,i)=>a-i-1).join(', ')}. Donc ${a} − ${b} = <b>${r}</b>.`
+    :ua>=b?`Je regarde les unités : ${ua} − ${b} = ${ua-b}. La dizaine ne bouge pas : ${a} − ${b} = <b>${r}</b>. Pas besoin de passer par 10 !`
+    :`Je passe par 10 : ${a} − ${ua} = ${a-ua}. Il reste ${b-ua} à enlever : ${a-ua} − ${b-ua} = <b>${r}</b>.`}
+  else if(ub===0)l=`J'enlève ${b/10} dizaine${pl(b/10)} : ${a} − ${b} = <b>${r}</b>.`;
+  else l=`J'enlève d'abord les dizaines : ${a} − ${tb} = ${a-tb}. Puis les unités : ${a-tb} − ${ub} = <b>${r}</b>.`;
+  return `<ul><li>${l}</li><li>Je vérifie avec une addition : ${r} + ${b} = ${a} ✔</li></ul>`;
+}
 function hintSteps(q){
   const out=[];const memo=memoOf(q);
-  if(memo)out.push({t:'Le rappel',h:memo.replace(/<h3>.*?<\/h3>/,'')});
+  if(q.calc)out.push({t:'Le rappel',h:rappelCalc(q.calc)});
+  else if(memo)out.push({t:'Le rappel',h:memo.replace(/<h3>.*?<\/h3>/,'')});
   const M=(typeof METHODS!=='undefined'&&METHODS[q.modId||G.mod.id])||'';
   if(M)out.push({t:'La méthode',h:M});
   if(q.hint)out.push({t:'Un dessin pour t\u2019aider',h:q.hint});
