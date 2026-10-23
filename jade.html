@@ -719,7 +719,12 @@ function genPoser(){
     steps.push({d,h,co});c=co;
   }
   const sym={add:'+',sub:'−',mul:'×'}[t];
-  return {key:'o'+a+t+b,type:'posed',kicker:{add:'Addition',sub:'Soustraction',mul:'Multiplication'}[t],t,a,b,r,sym,steps,
+  const tip=(()=>{const x=dg(a,0),y=dg(b,0);
+    const pose=`Je pose ${fmt(a)} ${sym} ${fmt(b)} en alignant les chiffres : unités sous unités, dizaines sous dizaines.`;
+    if(t==='add')return `<ul><li>${pose}</li><li>Je commence par la colonne des <b>unités</b> : ${x} + ${y}.</li><li>Si ça fait 10 ou plus, j'écris le chiffre des unités et je <b>retiens 1</b> au-dessus de la colonne des dizaines.</li></ul>`;
+    if(t==='sub')return `<ul><li>${pose}</li><li>Je commence par la colonne des <b>unités</b> : ${x} − ${y}.</li><li>${x<y?`${x} est plus petit que ${y} : j'ajoute une dizaine en haut (${x+10} − ${y}) et j'ajoute <b>+1</b> en bas dans la colonne des dizaines.`:`${x} est plus grand que ${y} (ou égal) : je peux enlever directement.`}</li></ul>`;
+    return `<ul><li>Je multiplie chaque chiffre de ${fmt(a)} par ${b}, en commençant par les <b>unités</b> : ${x} × ${b}.</li><li>Si le résultat dépasse 9, j'écris les unités et je <b>retiens</b> les dizaines pour la colonne suivante.</li></ul>`;})();
+  return {key:'o'+a+t+b,tip,type:'posed',kicker:{add:'Addition',sub:'Soustraction',mul:'Multiplication'}[t],t,a,b,r,sym,steps,
     explain:`${fmt(a)} ${sym} ${fmt(b)} = <b>${fmt(r)}</b><div class="rule"><b>Colonne par colonne, en partant de la droite :</b><ol class="steps">${steps.map((st,i)=>`<li><b>${COLS[i]||'colonne suivante'}</b> : ${st.h}</li>`).join('')}</ol></div><b>Vérifier :</b> ${t==='add'?`l'ordre de grandeur ${fmt(Math.round(a/100)*100)} + ${fmt(Math.round(b/100)*100)} ≈ ${fmt(Math.round(a/100)*100+Math.round(b/100)*100)}`:t==='sub'?`${fmt(r)} + ${fmt(b)} = ${fmt(a)}`:`${fmt(a)} ≈ ${fmt(Math.round(a/100)*100)}, et ${fmt(Math.round(a/100)*100)} × ${b} = ${fmt(Math.round(a/100)*100*b)}, c'est proche`}.`};
 }
 
@@ -743,23 +748,23 @@ function genTables(){
 
 /* ============ CALCUL MENTAL ============ */
 const MG=[
- ()=>{const a=ri(3,99);return[`${a} × 10`,a*10,`× 10 : chaque chiffre avance d'un rang → ${a} devient ${a*10}.`]},
- ()=>{const a=ri(3,99);return[`${a} × 100`,a*100,`× 100 : chaque chiffre avance de deux rangs.`]},
- ()=>{const a=ri(11,99)/10;return[`${fmt(a)} × 10`,r2(a*10),`× 10 avec un décimal : les chiffres avancent d'un rang, ${fmt(a)} devient ${fmt(a*10)}. (Ajouter un zéro ne marche pas !)`]},
- ()=>{const a=ri(3,99)*10;return[`${a} ÷ 10`,a/10,`÷ 10 : chaque chiffre recule d'un rang.`]},
- ()=>{const n=ri(14,89);return[`${n} + 9`,n+9,`+ 9 = + 10 − 1 : ${n} + 10 = ${n+10}, puis − 1 = ${n+9}.`]},
- ()=>{const n=ri(14,79);return[`${n} + 19`,n+19,`+ 19 = + 20 − 1 : ${n} + 20 = ${n+20}, puis − 1 = ${n+19}.`]},
- ()=>{const n=ri(21,99);return[`${n} − 9`,n-9,`− 9 = − 10 + 1 : ${n} − 10 = ${n-10}, puis + 1 = ${n-9}.`]},
- ()=>{const n=ri(150,900);return[`${n} − 99`,n-99,`− 99 = − 100 + 1 : ${n} − 100 = ${n-100}, puis + 1 = ${n-99}.`]},
- ()=>{const a=ri(11,89);return[`${a} + ? = 100`,100-a,`Complément à 100 : de ${a} à ${Math.ceil(a/10)*10} il y a ${Math.ceil(a/10)*10-a}, puis jusqu'à 100 il y a ${100-Math.ceil(a/10)*10} → ${100-a}.`]},
- ()=>{const a=50*ri(1,19);return[`${a} + ? = 1 000`,1000-a,`Complément à 1 000 : ${a} + ${1000-a} = 1 000.`]},
- ()=>{const n=pick([ri(12,49),125,150,250,ri(12,49)]);return[`Le double de ${n}`,n*2,`Double de ${n} : ${n} + ${n} = ${n*2}.`]},
- ()=>{const n=2*ri(6,60);return[`La moitié de ${n}`,n/2,`Moitié de ${n} : ${n} ÷ 2 = ${n/2}.`]},
- ()=>{const n=2*ri(6,30);return[`${n} × 5`,n*5,`× 5 = × 10 puis ÷ 2 : ${n*10} ÷ 2 = ${n*5}.`]},
- ()=>{const n=ri(12,19);return[`${n} × 11`,n*11,`× 11 = × 10 + le nombre : ${n*10} + ${n} = ${n*11}.`]},
- ()=>{const n=ri(12,19),m=ri(3,6);return[`${n} × ${m}`,n*m,`Je décompose : (10 × ${m}) + (${n-10} × ${m}) = ${10*m} + ${(n-10)*m} = ${n*m}.`]},
+ ()=>{const a=ri(3,99);return[`${a} × 10`,a*10,`× 10 : chaque chiffre avance d'un rang → ${a} devient ${a*10}.`,`× 10 : chaque chiffre de ${a} avance d'un rang vers la gauche (les unités deviennent des dizaines).`]},
+ ()=>{const a=ri(3,99);return[`${a} × 100`,a*100,`× 100 : chaque chiffre avance de deux rangs.`,`× 100 : chaque chiffre de ${a} avance de <b>deux</b> rangs vers la gauche.`]},
+ ()=>{const a=ri(11,99)/10;return[`${fmt(a)} × 10`,r2(a*10),`× 10 avec un décimal : les chiffres avancent d'un rang, ${fmt(a)} devient ${fmt(a*10)}. (Ajouter un zéro ne marche pas !)`,`× 10 avec un nombre à virgule : chaque chiffre de ${fmt(a)} avance d'un rang, la virgule ne bouge pas. Attention, ajouter un zéro ne marche pas !`]},
+ ()=>{const a=ri(3,99)*10;return[`${a} ÷ 10`,a/10,`÷ 10 : chaque chiffre recule d'un rang.`,`÷ 10 : chaque chiffre de ${a} recule d'un rang vers la droite (les dizaines deviennent des unités).`]},
+ ()=>{const n=ri(14,89);return[`${n} + 9`,n+9,`+ 9 = + 10 − 1 : ${n} + 10 = ${n+10}, puis − 1 = ${n+9}.`,`+ 9, c'est + 10 − 1 : je calcule ${n} + 10, puis j'enlève 1.`]},
+ ()=>{const n=ri(14,79);return[`${n} + 19`,n+19,`+ 19 = + 20 − 1 : ${n} + 20 = ${n+20}, puis − 1 = ${n+19}.`,`+ 19, c'est + 20 − 1 : je calcule ${n} + 20, puis j'enlève 1.`]},
+ ()=>{const n=ri(21,99);return[`${n} − 9`,n-9,`− 9 = − 10 + 1 : ${n} − 10 = ${n-10}, puis + 1 = ${n-9}.`,`− 9, c'est − 10 + 1 : je calcule ${n} − 10, puis j'ajoute 1.`]},
+ ()=>{const n=ri(150,900);return[`${n} − 99`,n-99,`− 99 = − 100 + 1 : ${n} − 100 = ${n-100}, puis + 1 = ${n-99}.`,`− 99, c'est − 100 + 1 : je calcule ${n} − 100, puis j'ajoute 1.`]},
+ ()=>{const a=ri(11,89);return[`${a} + ? = 100`,100-a,`Complément à 100 : de ${a} à ${Math.ceil(a/10)*10} il y a ${Math.ceil(a/10)*10-a}, puis jusqu'à 100 il y a ${100-Math.ceil(a/10)*10} → ${100-a}.`,`Je monte de ${a} jusqu'à la dizaine suivante (${Math.ceil(a/10)*10}), puis de ${Math.ceil(a/10)*10} jusqu'à 100, et j'additionne les deux sauts.`]},
+ ()=>{const a=50*ri(1,19);return[`${a} + ? = 1 000`,1000-a,`Complément à 1 000 : ${a} + ${1000-a} = 1 000.`,`Je cherche ce qu'il manque à ${a} pour faire 1 000 : d'abord jusqu'à la centaine suivante, puis de cette centaine jusqu'à 1 000.`]},
+ ()=>{const n=pick([ri(12,49),125,150,250,ri(12,49)]);return[`Le double de ${n}`,n*2,`Double de ${n} : ${n} + ${n} = ${n*2}.`,`Le double, c'est × 2. Je décompose ${n} : double de ${Math.floor(n/10)*10}, puis double de ${n%10}, et j'additionne.`]},
+ ()=>{const n=2*ri(6,60);return[`La moitié de ${n}`,n/2,`Moitié de ${n} : ${n} ÷ 2 = ${n/2}.`,`La moitié, c'est ÷ 2. Je découpe ${n} en nombres faciles à partager en deux, puis j'additionne les moitiés.`]},
+ ()=>{const n=2*ri(6,30);return[`${n} × 5`,n*5,`× 5 = × 10 puis ÷ 2 : ${n*10} ÷ 2 = ${n*5}.`,`× 5, c'est × 10 puis ÷ 2 : je calcule ${n} × 10, puis je prends la moitié.`]},
+ ()=>{const n=ri(12,19);return[`${n} × 11`,n*11,`× 11 = × 10 + le nombre : ${n*10} + ${n} = ${n*11}.`,`× 11, c'est × 10 + le nombre : je calcule ${n} × 10, puis j'ajoute ${n}.`]},
+ ()=>{const n=ri(12,19),m=ri(3,6);return[`${n} × ${m}`,n*m,`Je décompose : (10 × ${m}) + (${n-10} × ${m}) = ${10*m} + ${(n-10)*m} = ${n*m}.`,`Je décompose ${n} en 10 + ${n-10} : je calcule 10 × ${m}, puis ${n-10} × ${m}, et j'additionne.`]},
 ];
-function genMental(){const [p,a,e]=pick(MG)();return{key:'m'+p,type:'num',kicker:'Calcul mental',prompt:`<div class="big">${p.replace('?','<span class="hl">?</span>')}</div>`,answer:a,explain:`Réponse : <b>${fmt(a)}</b><br>${e}`,dec:!Number.isInteger(a)}}
+function genMental(){const [p,a,e,tip]=pick(MG)();return{key:'m'+p,tip,type:'num',kicker:'Calcul mental',prompt:`<div class="big">${p.replace('?','<span class="hl">?</span>')}</div>`,answer:a,explain:`Réponse : <b>${fmt(a)}</b><br>${e}`,dec:!Number.isInteger(a)}}
 
 
 
@@ -1559,7 +1564,8 @@ function ordTap(k){
 }
 function hintSteps(q){
   const out=[];const memo=memoOf(q);
-  if(memo)out.push({t:'Le rappel',h:memo.replace(/<h3>.*?<\/h3>/,'')});
+  if(q.tip)out.push({t:'Le rappel',h:q.tip});
+  else if(memo)out.push({t:'Le rappel',h:memo.replace(/<h3>.*?<\/h3>/,'')});
   const M=(typeof METHODS!=='undefined'&&METHODS[q.modId||G.mod.id])||'';
   if(M)out.push({t:'La méthode',h:M});
   if(q.hint)out.push({t:'Un dessin pour t\u2019aider',h:q.hint});
