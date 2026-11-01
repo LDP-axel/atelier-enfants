@@ -37,7 +37,11 @@ function view(){
   const kid=KIDS.find(k=>k.slug===CUR), D=DATA[CUR]||{}, P=D.state||{days:{},set:{}}, S=P.set||{};
   const today=dkey(new Date()), r=(P.days||{})[today]||{ms:0,q:0,ok:0};
   const days=Array.from({length:14},(_,i)=>{const d=new Date();d.setDate(d.getDate()-13+i);const k=dkey(d);return [k,(P.days||{})[k]||{ms:0,q:0,ok:0}]});
-  const wk=days.slice(-7), wq=wk.reduce((s,[,x])=>s+x.q,0), wok=wk.reduce((s,[,x])=>s+x.ok,0), maxMs=Math.max(1,...days.map(([,x])=>x.ms));
+  const lundiD=new Date();lundiD.setDate(lundiD.getDate()-((lundiD.getDay()+6)%7));const lundi=dkey(lundiD);
+  const wk=Object.entries(P.days||{}).filter(([k])=>k>=lundi), wq=wk.reduce((s,[,x])=>s+(x.q||0),0), wok=wk.reduce((s,[,x])=>s+(x.ok||0),0), wms=wk.reduce((s,[,x])=>s+(x.ms||0),0);
+  // Semaines passées (du lundi au dimanche)
+  const sem={};Object.entries(P.days||{}).forEach(([k,x])=>{const d=new Date(k+'T12:00');d.setDate(d.getDate()-((d.getDay()+6)%7));const m=dkey(d);const w=sem[m]=sem[m]||{ms:0,q:0,ok:0,j:0};w.ms+=x.ms||0;w.q+=x.q||0;w.ok+=x.ok||0;if(x.q)w.j++});
+  const semaines=Object.entries(sem).sort((a,b)=>b[0].localeCompare(a[0])).slice(0,12), maxMs=Math.max(1,...days.map(([,x])=>x.ms));
   const mods={};(D.attempts||[]).forEach(a=>{const m=mods[a.module_id]=mods[a.module_id]||{n:0,ok:0,h:0};m.n++;if(a.is_correct)m.ok++;m.h+=a.hints_used||0});
   const weekId=Object.keys(P.weeks||{}).sort().pop(), W=weekId?P.weeks[weekId]:null;
   main.innerHTML=`<div class="row" style="justify-content:space-between"><h1>Espace parents</h1><a class="btn ghost" href="index.html">← Accueil</a></div>
@@ -46,12 +50,14 @@ function view(){
   <div class="card"><div class="kicker">Résumé · dernière synchronisation ${D.updated?new Date(D.updated).toLocaleString('fr-FR'):'jamais'}</div>
    ${D.state?'':'<p class="sub">Pas encore de données en ligne : demandez à '+esc(kid.first_name)+' d’ouvrir son atelier sur un appareil connecté.</p>'}
    <div class="stats"><div class="stat"><b>${P.stars||0}</b>étoiles</div><div class="stat"><b>${Math.floor(r.ms/60000)} min</b>aujourd'hui (objectif ${S.min||'?'})</div>
-   <div class="stat"><b>${r.q?pctOf(r)+' %':'—'}</b>réussite aujourd'hui</div><div class="stat"><b>${wq?Math.round(100*wok/wq)+' %':'—'}</b>réussite 7 jours (${wq} questions)</div></div>
+   <div class="stat"><b>${r.q?pctOf(r)+' %':'—'}</b>réussite aujourd'hui</div><div class="stat"><b>${wq?Math.round(100*wok/wq)+' %':'—'}</b>réussite cette semaine (${wq} questions, ${Math.round(wms/60000)} min)</div></div>
    <div class="kicker" style="margin-top:14px">Temps de travail, 14 derniers jours (jaune = objectif du jour atteint)</div>
    <div class="bars">${days.map(([k,x])=>`<div class="${dayMet(P,x)?'met':''}" style="height:${Math.round(x.ms/maxMs*100)}%" title="${k} : ${Math.floor(x.ms/60000)} min, ${x.q} questions, ${pctOf(x)} %"></div>`).join('')}</div>
    <div class="barlab">${days.map(([k])=>`<span>${k.slice(8)}</span>`).join('')}</div>
    <p>${W?(W.unlocked?`Cadeau de la semaine <b>gagné</b>${W.choice?` · choix : <b>${esc(W.choice)}</b>${W.given?' (remis)':' (à remettre)'}`:''}.`:'Cadeau de la semaine pas encore gagné.'):''}</p></div>
   <div class="card" id="cmcard"><h2>Modules créés avec l’IA</h2><p class="sub">Chargement…</p></div>
+  <div class="card"><h2>Semaine par semaine</h2><p class="sub">Les compteurs repartent à zéro chaque lundi. Les étoiles et les récompenses sont gardées.</p><div class="tablewrap"><table><tr><th>Semaine du</th><th>Jours joués</th><th>Temps</th><th>Exercices</th><th>Réussite</th></tr>
+   ${semaines.map(([m,w])=>`<tr><td>${new Date(m+'T12:00').toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}${m===lundi?' (en cours)':''}</td><td>${w.j}</td><td>${Math.round(w.ms/60000)} min</td><td>${w.q}</td><td>${w.q?`<span class="pill ${w.ok/w.q>=.7?'ok':'ko'}">${Math.round(100*w.ok/w.q)} %</span>`:'—'}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Pas encore de données.</td></tr>'}</table></div></div>
   <div class="card"><h2>Par matière</h2><div class="tablewrap"><table><tr><th>Atelier</th><th>Questions</th><th>Réussite</th><th>Indices utilisés</th><th>Niveau</th></tr>
    ${Object.entries(mods).sort((a,b)=>b[1].n-a[1].n).map(([m,x])=>`<tr><td>${esc(modName(m))}</td><td>${x.n}</td><td><span class="pill ${x.ok/x.n>=.7?'ok':'ko'}">${Math.round(100*x.ok/x.n)} %</span></td><td>${x.h}</td><td>${(P.lv||{})[m]||''}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">Aucune réponse enregistrée pour l’instant.</td></tr>'}</table></div></div>
   <div class="card"><h2>Carnet d'erreurs à revoir (${(P.carnet||[]).length})</h2><p class="sub">Les questions ratées avec l'explication, pour en parler ensemble.</p>

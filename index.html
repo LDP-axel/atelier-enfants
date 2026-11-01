@@ -76,15 +76,16 @@ async function route(){
   const statsOf=(k,i)=>{
     const r=ST[k.id], P=r&&r.state||{}, days=P.days||{}, today=dkey(new Date());
     let w={ms:0,q:0,ok:0},all={ms:0,q:0,ok:0};
-    for(const [d,x] of Object.entries(days)){all.ms+=x.ms||0;all.q+=x.q||0;all.ok+=x.ok||0;if((Date.now()-new Date(d))/864e5<7){w.ms+=x.ms||0;w.q+=x.q||0;w.ok+=x.ok||0}}
+    const lundi=(()=>{const d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return dkey(d)})();
+    for(const [d,x] of Object.entries(days)){all.ms+=x.ms||0;all.q+=x.q||0;all.ok+=x.ok||0;if(d>=lundi){w.ms+=x.ms||0;w.q+=x.q||0;w.ok+=x.ok||0}}
     const t=days[today]||{ms:0,q:0,ok:0}, last=r&&r.updated_at, actif=last&&(Date.now()-new Date(last))<2*864e5;
     return `<div class="kstat"><span class="pill ${actif?'ok':'idle'}">${actif?'Actif':'Inactif'}</span> <span class="sub">dernière activité ${ago(last)}</span></div>
      <div class="kgrid">
       <div><b>${P.stars||0}</b>étoiles</div>
       <div><b>${fmtMin(t.ms||0)}</b>aujourd’hui</div>
-      <div><b>${fmtMin(w.ms)}</b>sur 7 jours</div>
-      <div><b>${counts[i].count??all.q}</b>exercices faits</div>
-      <div><b>${w.q?Math.round(100*w.ok/w.q)+' %':'—'}</b>réussite 7 j</div>
+      <div><b>${fmtMin(w.ms)}</b>cette semaine</div>
+      <div><b>${w.q}</b>exercices cette semaine</div>
+      <div><b>${w.q?Math.round(100*w.ok/w.q)+' %':'—'}</b>réussite semaine</div>
       <div><b>${all.q?Math.round(100*all.ok/all.q)+' %':'—'}</b>réussite totale</div>
      </div>`;
   };
