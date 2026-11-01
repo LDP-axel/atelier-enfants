@@ -344,6 +344,7 @@ polyline.hit:hover{stroke:rgba(247,181,0,.35)}
 .tabb.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
 @media (max-width:520px){.tabb{font-size:13px}}
 .qcard.cours h3{margin-top:14px}
+.chip.nostar{background:var(--line);font-size:12px}.capped{display:inline-block;font-size:11px;font-weight:700;color:var(--good,#2e7d32);margin-right:6px}
 </style>
 <script>window.APP_CHILD="lanahee";</script>
 <script src="config.js"></script>
@@ -1484,6 +1485,10 @@ function applyTabs(){
   app.insertBefore(bar,par);T.forEach(([k])=>app.insertBefore(P_[k],par));
 }
 
+/* Pas plus de 3 parties « à étoiles » par module et par jour : au-delà on s'entraîne, sans étoile */
+const MAXP=3;
+function playsToday(){const t=dkey(new Date());if(!P.plays||P.plays.d!==t)P.plays={d:t,m:{}};return P.plays.m}
+function countPlay(id){const pm=playsToday();pm[id]=(pm[id]||0)+1;return pm[id]>MAXP}
 const MODS=[
  {id:'sons',sub:'fr',name:'Les sons',desc:'ou, on, an, oi, ch, in… avec écoute',glyph:'ou',gen:genSons},
  {id:'syllabes',sub:'fr',name:'Les syllabes',desc:'Je tape dans mes mains',glyph:'la·pin',gen:genSyl},
@@ -1873,7 +1878,7 @@ function home(){
   G=null;keyHandler=null;setAccent('fr');
   const u=unlocked(), next=u*PER-P.stars;
   if(P.companion>=u)P.companion=0;
-  const tile=m=>{const c=P.best[m.id]||0;return `<button class="tile" data-act="open" data-id="${m.id}"><span class="glyph">${m.glyph}</span><div><h3>${m.name}</h3><p>${m.desc}</p><span class="crowns" aria-label="${c} couronnes sur 3">${[1,2,3].map(k=>`<i class="${k<=c?'on':''}"></i>`).join('')}</span></div></button>`};
+  const tile=m=>{const c=P.best[m.id]||0;return `<button class="tile" data-act="open" data-id="${m.id}"><span class="glyph">${m.glyph}</span><div><h3>${m.name}</h3><p>${m.desc}</p>${(playsToday()[m.id]||0)>=MAXP?`<span class="capped">★ du jour gagnées</span>`:''}<span class="crowns" aria-label="${c} couronnes sur 3">${[1,2,3].map(k=>`<i class="${k<=c?'on':''}"></i>`).join('')}</span></div></button>`};
   const sect=(sub,title)=>`<section class="atelier ${sub}"><div class="atelier-head"><h2>${title}</h2></div><div class="tiles">${MODS.filter(m=>m.sub===sub).map(tile).join('')}</div></section>`;
   $app.innerHTML=`
   <div class="hello"><div class="hello-l">${squishy(P.companion,'happy','','id="homeSq"')}<div><h1>Salut <span>${NAME}</span> !</h1><div class="sub">${SQ[P.companion].n} t'attend. Chaque bonne réponse = une étoile.</div></div></div>
@@ -1947,11 +1952,11 @@ function start(id){
   const m=modById(id);setAccent(m.sub);
   const qs=[],keys=new Set();let guard=0;
   while(qs.length<N&&guard++<400){const q=m.gen();if(keys.has(q.key))continue;keys.add(q.key);q.modId=m.id;qs.push(q)}
-  G={mod:m,qs,i:0,res:[],log:[],memo:false,earned:0,active:true,startStars:P.stars};
+  G={mod:m,qs,i:0,res:[],log:[],memo:false,earned:0,active:true,startStars:P.stars,noStar:countPlay(m.id)};save();
   lastAct=Date.now();save();renderQ();
 }
 function topBar(){
-  return `<div class="top"><button class="iconbtn" data-act="home" aria-label="Quitter">←</button>${squishy(P.companion,'idle','mascot','id="mascot"')}<div class="title">${G.mod.name}</div><span class="chip" id="tchip">${timeLabel()}</span>${typeof CALC!=='undefined'?'<button class="iconbtn" data-act="calc" aria-label="Calculette">+−</button>':''}<button class="iconbtn" data-act="memo" aria-pressed="${G.memo}">Rappel</button></div>
+  return `<div class="top"><button class="iconbtn" data-act="home" aria-label="Quitter">←</button>${squishy(P.companion,'idle','mascot','id="mascot"')}<div class="title">${G.mod.name}</div>${G.noStar?`<span class="chip nostar" title="Déjà 3 parties de ce module aujourd’hui">Entraînement sans ★</span>`:''}<span class="chip" id="tchip">${timeLabel()}</span>${typeof CALC!=='undefined'?'<button class="iconbtn" data-act="calc" aria-label="Calculette">+−</button>':''}<button class="iconbtn" data-act="memo" aria-pressed="${G.memo}">Rappel</button></div>
   ${G.chrono?`<div class="timer"><b id="tbar" style="width:${G.left/60*100}%"></b></div>`:`<div class="prog">${Array.from({length:G.n||N},(_,k)=>`<i class="${k<G.res.length?(G.res[k]?'ok':'ko'):(k===G.i?'cur':'')}"></i>`).join('')}</div>`}`;
 }
 function renderQ(){
@@ -2121,10 +2126,10 @@ function finish(ok,pre,given){
   poke(document.getElementById('mascot'),ok?'jump':'sad',ok?'happy':'sad');
   if(G.chrono){chronoNext(ok,q);return}
   G.res.push(ok);G.log.push({ok,q:plainPrompt(q),given:given||'',ans:answerLabel(q),explain:q.explain});
-  if(ok){G.earned++;P.stars++;save();sGood()}else sBad();
+  if(ok){if(!G.noStar){G.earned++;P.stars++}save();sGood()}else sBad();
   const praise=pick(['Bravo !','Super !','Exact !','Tu gères !','Parfait !','Génial !']);
   const sh=document.createElement('div');sh.className='sheet '+(ok?'good':'bad');sh.setAttribute('role','status');
-  sh.innerHTML=`<div class="in">${squishy(P.companion,ok?'happy':'sad',ok?'jump':'sad')}<div class="msg"><h3>${ok?praise+' +1 ★':'Pas tout à fait…'}</h3><div class="fb">${feedbackHTML(q,ok,given,pre)}</div></div><button class="btn" data-act="next" id="nextbtn">Continuer</button></div>`;
+  sh.innerHTML=`<div class="in">${squishy(P.companion,ok?'happy':'sad',ok?'jump':'sad')}<div class="msg"><h3>${ok?praise+(G.noStar?'':' +1 ★'):'Pas tout à fait…'}</h3><div class="fb">${feedbackHTML(q,ok,given,pre)}</div></div><button class="btn" data-act="next" id="nextbtn">Continuer</button></div>`;
   document.body.appendChild(sh);
   setTimeout(()=>{const b=document.getElementById('nextbtn');b&&b.focus({preventScroll:true})},50);
   keyHandler=v=>{if(v==='ok')next()};
@@ -2161,13 +2166,13 @@ function end(){
 /* chrono */
 function startChrono(){
   tableChoice='mix';setAccent('ma');
-  G={mod:modById('tables'),chrono:true,score:0,left:60,i:0,qs:[genTables()],res:[],memo:false,earned:0,active:true,startStars:P.stars};
+  G={noStar:countPlay('tables'),mod:modById('tables'),chrono:true,score:0,left:60,i:0,qs:[genTables()],res:[],memo:false,earned:0,active:true,startStars:P.stars};
   lastAct=Date.now();save();renderQ();
   G.timer=setInterval(()=>{if(!G||!G.chrono)return;G.left--;const b=document.getElementById('tbar');if(b)b.style.width=(G.left/60*100)+'%';if(G.left<=0)endChrono()},1000);
 }
 function chronoNext(ok,q){
   const card=document.querySelector('.qcard');
-  if(ok){G.score++;G.earned++;P.stars++;save();beep([[760,.07]]);}else{sBad();const s=document.getElementById('slot');if(s)s.textContent=fmt(q.answer);}
+  if(ok){G.score++;if(!G.noStar){G.earned++;P.stars++}save();beep([[760,.07]]);}else{sBad();const s=document.getElementById('slot');if(s)s.textContent=fmt(q.answer);}
   if(card)card.classList.add(ok?'flash-ok':'flash-ko');
   setTimeout(()=>{if(!G||!G.chrono||G.left<=0)return;let nq;do{nq=genTables()}while(nq.key===q.key);G.qs.push(nq);G.i++;renderQ()},ok?250:900);
 }
