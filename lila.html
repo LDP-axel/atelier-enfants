@@ -1182,6 +1182,15 @@ function calcKey(v){
 
 /* ============ Modules ============ */
 const MEMO={
+ r1789:`<h3>1789, l’année qui change tout</h3>
+<p><b>Avant 1789.</b> La France a un roi tout-puissant, <b>Louis XVI</b>. La société est divisée en <b>trois ordres</b> : le <b>clergé</b> (ceux qui prient), la <b>noblesse</b> (ceux qui combattent) et le <b>tiers état</b> (tous les autres, presque toute la population). Les deux premiers ont des <b>privilèges</b> : ils paient peu d'impôts. Le tiers état, lui, paie beaucoup… et le royaume n'a plus d'argent.</p>
+<p>📜 <b>5 mai 1789 · Les États généraux.</b> Le roi réunit à <b>Versailles</b> les députés des trois ordres pour trouver de l'argent. Les Français ont écrit leurs plaintes dans des <b>cahiers de doléances</b>. Problème : chaque ordre a une voix, donc le clergé et la noblesse gagnent toujours 2 contre 1.</p>
+<p>✋ <b>20 juin 1789 · Le serment du Jeu de paume.</b> Les députés du tiers état se déclarent <b>Assemblée nationale</b>. Ils trouvent leur salle fermée et se réunissent dans une salle de <b>jeu de paume</b> (un ancêtre du tennis). Là, ils jurent de ne pas se séparer avant d'avoir donné une <b>Constitution</b> à la France : des règles que même le roi devra respecter.</p>
+<p>🏰 <b>14 juillet 1789 · La prise de la Bastille.</b> À <b>Paris</b>, le peuple a peur que le roi envoie ses soldats. Les Parisiens prennent des fusils aux Invalides, puis attaquent la <b>Bastille</b>, une prison-forteresse, pour y prendre de la poudre. La Bastille tombe : c'est le symbole de la fin du pouvoir absolu du roi. Le 14 juillet est aujourd'hui notre <b>fête nationale</b>.</p>
+<p>⚖️ <b>4 août 1789 · L'abolition des privilèges.</b> Pendant la nuit, les députés <b>suppriment les privilèges</b> des nobles et du clergé. Désormais, tout le monde doit payer l'impôt et peut accéder à tous les métiers.</p>
+<p>📃 <b>26 août 1789 · La Déclaration des droits de l'homme et du citoyen.</b> L'Assemblée écrit un texte très important. Article 1 : <i>« Les hommes naissent et demeurent libres et égaux en droits. »</i> On y trouve la liberté d'expression et l'égalité devant la loi.</p>
+<p><b>À retenir :</b> en quelques mois, la France passe d'un roi qui décide de tout à des citoyens libres et égaux en droits. La devise <b>Liberté, Égalité, Fraternité</b> vient de cette Révolution.</p>
+<p><b>Pour retenir les dates :</b> mai → juin → juillet → août → août. <b>5</b> mai on se réunit, <b>20</b> juin on jure, <b>14</b> juillet on attaque, <b>4</b> août on abolit, <b>26</b> août on déclare.</p>`,
  volcans:`<h3>Les volcans</h3><ul><li>Sous la terre, la roche fondue est le <b>magma</b>. Il s'accumule dans la <b>chambre magmatique</b>.</li><li>Il monte par la <b>cheminée</b> et sort par le <b>cratère</b> : c'est alors la <b>lave</b>.</li><li>Les laves et les cendres forment le <b>cône</b>.</li><li>Éruption <b>effusive</b> : lave fluide, coulées (volcan rouge). Éruption <b>explosive</b> : cendres, nuées ardentes (volcan gris).</li><li>Les volcans sont surtout au bord des <b>plaques</b> qui bougent. Ces mouvements causent aussi les <b>séismes</b>.</li><li>Exemples : Piton de la Fournaise (La Réunion), chaîne des Puys (Auvergne), Vésuve (Pompéi), Etna.</li></ul>`,
  doubles:`<h3>Doubles et moitiés</h3><ul><li>Le <b>double</b>, c'est × 2 : double de 34 = 68.</li><li>La <b>moitié</b>, c'est ÷ 2 : moitié de 68 = 34.</li><li>Je <b>décompose</b> : double de 47 = double de 40 + double de 7 = 80 + 14 = 94.</li><li>Moitié de 74 = moitié de 60 + moitié de 14 = 30 + 7 = 37.</li><li>Moitié d'un nombre impair : moitié de 15 = 7,5.</li><li>À connaître par cœur : doubles de 1 à 20, de 25 (50), 50 (100), 15 (30), 75 (150).</li></ul>`,
  conj:`<h3>Le rappel</h3><ul><li><b>Présent</b> : e, es, e, ons, ez, ent · is, is, it, issons, issez, issent</li><li><b>Futur</b> = infinitif + ai, as, a, ons, ez, ont</li><li><b>Imparfait</b> = radical de « nous » + ais, ais, ait, ions, iez, aient</li><li><b>Passé composé</b> = être / avoir + participe passé</li><li><b>é ou er ?</b> vendu → é · vendre → er</li></ul>`,
@@ -1354,6 +1363,55 @@ function applyTabs(){
 const MAXP=3;
 function playsToday(){const t=dkey(new Date());if(!P.plays||P.plays.d!==t)P.plays={d:t,m:{}};return P.plays.m}
 function countPlay(id){const pm=playsToday();pm[id]=(pm[id]||0)+1;return pm[id]>MAXP}
+/* ============ 1789, L'ANNÉE QUI CHANGE TOUT ============ */
+// [jour de l'année pour trier, date, événement, petite description]
+const R89=[
+ [125,'5 mai 1789','Ouverture des États généraux','À Versailles, le roi Louis XVI réunit les députés des trois ordres pour trouver de l\'argent.'],
+ [171,'20 juin 1789','Serment du Jeu de paume','Les députés du tiers état jurent de ne pas se séparer avant d\'avoir écrit une Constitution.'],
+ [195,'14 juillet 1789','Prise de la Bastille','Les Parisiens prennent la Bastille, une prison qui symbolise le pouvoir absolu du roi.'],
+ [216,'4 août 1789','Abolition des privilèges','Pendant la nuit, les députés suppriment les privilèges des nobles et du clergé.'],
+ [238,'26 août 1789','Déclaration des droits de l\'homme et du citoyen','Un texte qui dit que les hommes naissent libres et égaux en droits.'],
+];
+const R89Q=[
+ ["Pourquoi Louis XVI réunit-il les États généraux en 1789 ?","parce que les caisses du royaume sont vides",["pour fêter son anniversaire","pour déclarer la guerre à l'Angleterre","pour choisir un nouveau roi"],"Le royaume est <b>ruiné</b> : le roi a besoin d'argent et veut créer de nouveaux impôts."],
+ ["Quels sont les trois ordres de la société en 1789 ?","le clergé, la noblesse et le tiers état",["les rois, les reines et les princes","les riches, les pauvres et les soldats","les villes, les villages et les châteaux"],"Le <b>clergé</b> (ceux qui prient), la <b>noblesse</b> (ceux qui combattent) et le <b>tiers état</b> (tous les autres : paysans, artisans, bourgeois)."],
+ ["Quel ordre représente presque toute la population (environ 98 %) ?","le tiers état",["la noblesse","le clergé","la famille royale"],"Le <b>tiers état</b>, c'est presque tout le monde : paysans, ouvriers, artisans, commerçants, bourgeois. Et c'est lui qui paie le plus d'impôts !"],
+ ["Dans quelle ville s'ouvrent les États généraux le 5 mai 1789 ?","Versailles",["Marseille","Lyon","Reims"],"Ils s'ouvrent à <b>Versailles</b>, où vit le roi Louis XVI."],
+ ["Comment s'appellent les cahiers où les Français écrivent leurs plaintes ?","les cahiers de doléances",["les cahiers de vacances","les cahiers de textes","les cahiers de chansons"],"Avant les États généraux, les Français écrivent leurs plaintes et leurs souhaits dans les <b>cahiers de doléances</b>."],
+ ["Que jurent les députés le 20 juin 1789 dans la salle du Jeu de paume ?","de ne pas se séparer avant d'avoir donné une Constitution à la France",["de rester fidèles au roi pour toujours","de partir en guerre","de construire un nouveau château"],"C'est le <b>serment du Jeu de paume</b> : ils veulent écrire une <b>Constitution</b>, des règles que même le roi devra respecter."],
+ ["Pourquoi les députés se retrouvent-ils dans la salle du Jeu de paume ?","leur salle habituelle a été fermée",["il pleuvait dehors","ils voulaient jouer au tennis","le roi les y avait invités"],"Le 20 juin, ils trouvent leur salle <b>fermée</b>. Ils vont alors dans une salle de <b>jeu de paume</b>, un ancêtre du tennis !"],
+ ["Qu'est-ce que la Bastille ?","une prison-forteresse à Paris",["un palais du roi","une église","un marché"],"La <b>Bastille</b> est une forteresse transformée en <b>prison</b>. Pour le peuple, elle représente le pouvoir absolu du roi."],
+ ["Que cherchent les Parisiens en attaquant la Bastille ?","de la poudre pour leurs fusils",["un trésor caché","le roi Louis XVI","du pain"],"Le matin, ils ont pris des fusils aux Invalides. Ils viennent chercher la <b>poudre</b> stockée à la Bastille."],
+ ["Que fête-t-on chaque année le 14 juillet ?","la fête nationale",["Noël","le jour de l'An","la fête des mères"],"Le <b>14 juillet</b> est la <b>fête nationale</b> française, avec des défilés et des feux d'artifice."],
+ ["Que décident les députés dans la nuit du 4 août 1789 ?","l'abolition des privilèges",["la mort du roi","la construction de Versailles","la fin des écoles"],"Ils <b>abolissent les privilèges</b> : les nobles et le clergé ne sont plus à part, tout le monde doit payer l'impôt."],
+ ["Qu'est-ce qu'un privilège ?","un avantage réservé à certaines personnes",["un impôt payé par tous","une fête de village","un château fort"],"Un <b>privilège</b>, c'est un avantage que seuls certains ont : par exemple, les nobles ne payaient pas certains impôts."],
+ ["Que dit l'article 1 de la Déclaration des droits de l'homme et du citoyen ?","Les hommes naissent et demeurent libres et égaux en droits.",["Le roi décide de tout.","Seuls les nobles peuvent voter.","Il faut obéir sans discuter."],"<b>« Les hommes naissent et demeurent libres et égaux en droits. »</b> C'est la phrase la plus célèbre de la Déclaration."],
+ ["Quel jour la Déclaration des droits de l'homme et du citoyen est-elle adoptée ?","le 26 août 1789",["le 14 juillet 1789","le 5 mai 1789","le 1er janvier 1800"],"Elle est adoptée le <b>26 août 1789</b>, un peu plus d'un mois après la prise de la Bastille."],
+ ["Qui est le roi de France en 1789 ?","Louis XVI",["Louis XIV","Napoléon","Charlemagne"],"C'est <b>Louis XVI</b>, avec la reine <b>Marie-Antoinette</b>."],
+ ["Quelle devise de la République vient de la Révolution ?","Liberté, Égalité, Fraternité",["Un pour tous, tous pour un","Paix et amour","Travail, Famille, Patrie"],"<b>Liberté, Égalité, Fraternité</b> : on la voit encore sur les mairies et les écoles."],
+];
+const R89VF=[
+ ["En 1789, les nobles payaient plus d'impôts que les paysans.",false,"<b>Faux.</b> C'est l'inverse : les nobles et le clergé avaient des privilèges, le tiers état payait le plus d'impôts."],
+ ["Le serment du Jeu de paume a lieu avant la prise de la Bastille.",true,"<b>Vrai.</b> 20 juin, puis 14 juillet."],
+ ["La prise de la Bastille a lieu à Versailles.",false,"<b>Faux.</b> La Bastille se trouve à <b>Paris</b>. Versailles, c'est le château du roi."],
+ ["La Déclaration des droits de l'homme dit que tous les hommes sont égaux en droits.",true,"<b>Vrai.</b> Article 1 : « Les hommes naissent et demeurent libres et égaux en droits. »"],
+ ["L'abolition des privilèges a lieu après la Déclaration des droits de l'homme.",false,"<b>Faux.</b> Les privilèges sont abolis dans la nuit du <b>4 août</b>, la Déclaration est adoptée le <b>26 août</b>."],
+ ["Les États généraux réunissent le clergé, la noblesse et le tiers état.",true,"<b>Vrai.</b> Ce sont les <b>trois ordres</b> de la société."],
+];
+function genR1789(){
+  const r=Math.random();
+  if(r<.22){const ev=shuffle(R89).slice(0,4).map(e=>[e[0],e[2],null]);
+    return {key:'r89o'+ev.map(e=>e[0]).join(),type:'order',kicker:'1789 · La frise',prompt:'Remets ces événements de 1789 dans l\'ordre, du <b>premier</b> au <b>dernier</b>.',events:ev,
+      explain:'Le bon ordre : '+R89.filter(e=>ev.some(x=>x[0]===e[0])).map(e=>`<b>${e[1]}</b> ${esc(e[2])}`).join(' → ')};}
+  if(r<.45){const e=pick(R89);
+    if(Math.random()<.5)return {key:'r89d'+e[0],type:'choice',kicker:'1789 · Quelle date ?',prompt:`<div class="big" style="font-size:1.4rem">${esc(e[2])}</div><p>${esc(e[3])}</p><p>C'était quel jour ?</p>`,options:shuffle(R89.map(x=>x[1])),answer:e[1],
+      explain:`<b>${e[1]}</b> : ${esc(e[2])}. ${esc(e[3])}`};
+    return {key:'r89e'+e[0],type:'choice',kicker:'1789 · Que se passe-t-il ?',prompt:`<div class="big" style="font-size:1.5rem">${e[1]}</div><p>Que se passe-t-il ce jour-là ?</p>`,options:shuffle(R89.map(x=>x[2])),answer:e[2],
+      explain:`<b>${e[1]}</b> : ${esc(e[2])}. ${esc(e[3])}`};}
+  if(r<.65){const [s,v,e]=pick(R89VF);return {key:'r89v'+s,type:'choice',kicker:'1789 · Vrai ou faux ?',prompt:`<div class="big" style="font-size:1.35rem">${esc(s)}</div>`,options:['Vrai','Faux'],answer:v?'Vrai':'Faux',explain:e};}
+  const q=genQCM(R89Q,'1789','r89q');return q;
+}
+
 const MODS=[
  {id:'conj',sub:'fr',name:'Conjugaison',desc:'Présent, futur, imparfait, passé composé',glyph:'je…',gen:genConj},
  {id:'nature',sub:'fr',name:'Nature des mots',desc:'Nom, verbe, adjectif, adverbe…',glyph:'Aa',gen:genNature},
@@ -1368,11 +1426,13 @@ const MODS=[
  {id:'histoire',sub:'mo',name:'Histoire',desc:'Des Gaulois à Napoléon, frise chronologique',glyph:'800',gen:genHist},
  {id:'geo',sub:'mo',name:'Géographie',desc:'Habiter, travailler, consommer en France',glyph:'N↑',gen:genGeo},
  {id:'cartes',sub:'mo',name:'Cartes',desc:'Explore et touche la carte de France et du monde',glyph:'◎',gen:genCarte},
+ {id:'r1789',sub:'mo',name:'1789, l’année qui change tout',desc:'5 dates, une frise, un quiz et des vrai ou faux',glyph:'🇫🇷',gen:genR1789},
  {id:'volcans',sub:'mo',name:'Les volcans',desc:'Éruptions, lave, magma, séismes',glyph:'🌋',gen:()=>genQCM(VOLC,'Les volcans','v')},
  {id:'corps',sub:'mo',name:'Le corps humain',desc:'Os, muscles, organes, les sens',glyph:'♥',gen:genAnat},
  {id:'anglais',sub:'en',name:'Anglais',desc:'Mots, phrases et petite grammaire, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 const METHODS={
+ r1789:"Je relis le récit dans l'onglet Cours. Pour la frise, je range par mois : mai, juin, juillet, puis les deux dates d'août (le 4 avant le 26). Pour chaque date, je me demande : qui agit (le roi, les députés, le peuple de Paris) et pour quoi faire.",
  volcans:"Je repère le mot clé (magma, lave, cratère…) et je me représente le volcan en coupe, du bas vers le haut : chambre → cheminée → cratère.",
  doubles:"Je décompose le nombre en dizaines et unités, je fais le double (ou la moitié) de chaque partie, puis j'additionne.",
  anglais:"1. J'appuie sur <b>Écouter</b> et je répète le mot à voix haute.<br>2. Je cherche s'il ressemble à un mot français (dinosaur, banana…).<br>3. J'élimine les réponses que je connais déjà.",

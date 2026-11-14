@@ -1,0 +1,56 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Tables de multiplication — Jade</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@page{size:A4;margin:9mm}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Atkinson Hyperlegible',sans-serif;color:#1f2a2a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:192mm;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2.5px solid #1f2a2a;padding-bottom:2mm;margin-bottom:3mm}
+h1{font-family:Fredoka;font-size:20pt;margin:0} header p{margin:0;font-size:9pt;color:#555}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2.4mm}
+.t{border:2px solid var(--c);border-radius:3mm;overflow:hidden}
+.t h3{margin:0;background:var(--c);color:#fff;font-family:Fredoka;font-size:12.5pt;text-align:center;padding:1.4mm 0}
+.l{display:flex;justify-content:space-between;padding:1.05mm 2.4mm;font-size:12pt}
+.l:nth-child(odd){background:#f4f6f6}
+.l b{font-family:Fredoka;font-weight:600;color:var(--c)}
+.memo{border:2px solid #1f2a2a;border-radius:3mm;padding:2mm 2.6mm;font-size:9.8pt;line-height:1.38}
+.memo h3{font-family:Fredoka;font-size:12.5pt;margin:0 0 1mm}
+.memo ul{margin:0;padding-left:4mm} .memo li{margin-bottom:.6mm}
+.memos{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4mm;margin-top:3mm}
+.hard{background:#FFF4D6;border-color:#E0A100}
+.hard .k{display:grid;grid-template-columns:1fr 1fr;gap:.6mm 3mm;font-size:10.8pt}
+.hard .k b{font-family:Fredoka}
+.foot{margin-top:2.4mm;font-size:8.4pt;color:#555;text-align:center}
+</style></head><body><div class="page">
+<header><h1>Mes tables de multiplication</h1><p>Jade · CM2 · à garder dans la trousse</p></header>
+<div class="grid"><div class="t" style="--c:#F2643F"><h3>Table de 1</h3><div class="l"><span>1 × 1</span><b>1</b></div><div class="l"><span>1 × 2</span><b>2</b></div><div class="l"><span>1 × 3</span><b>3</b></div><div class="l"><span>1 × 4</span><b>4</b></div><div class="l"><span>1 × 5</span><b>5</b></div><div class="l"><span>1 × 6</span><b>6</b></div><div class="l"><span>1 × 7</span><b>7</b></div><div class="l"><span>1 × 8</span><b>8</b></div><div class="l"><span>1 × 9</span><b>9</b></div><div class="l"><span>1 × 10</span><b>10</b></div></div><div class="t" style="--c:#0E8F80"><h3>Table de 2</h3><div class="l"><span>2 × 1</span><b>2</b></div><div class="l"><span>2 × 2</span><b>4</b></div><div class="l"><span>2 × 3</span><b>6</b></div><div class="l"><span>2 × 4</span><b>8</b></div><div class="l"><span>2 × 5</span><b>10</b></div><div class="l"><span>2 × 6</span><b>12</b></div><div class="l"><span>2 × 7</span><b>14</b></div><div class="l"><span>2 × 8</span><b>16</b></div><div class="l"><span>2 × 9</span><b>18</b></div><div class="l"><span>2 × 10</span><b>20</b></div></div><div class="t" style="--c:#3F6FD8"><h3>Table de 3</h3><div class="l"><span>3 × 1</span><b>3</b></div><div class="l"><span>3 × 2</span><b>6</b></div><div class="l"><span>3 × 3</span><b>9</b></div><div class="l"><span>3 × 4</span><b>12</b></div><div class="l"><span>3 × 5</span><b>15</b></div><div class="l"><span>3 × 6</span><b>18</b></div><div class="l"><span>3 × 7</span><b>21</b></div><div class="l"><span>3 × 8</span><b>24</b></div><div class="l"><span>3 × 9</span><b>27</b></div><div class="l"><span>3 × 10</span><b>30</b></div></div><div class="t" style="--c:#8A4FD0"><h3>Table de 4</h3><div class="l"><span>4 × 1</span><b>4</b></div><div class="l"><span>4 × 2</span><b>8</b></div><div class="l"><span>4 × 3</span><b>12</b></div><div class="l"><span>4 × 4</span><b>16</b></div><div class="l"><span>4 × 5</span><b>20</b></div><div class="l"><span>4 × 6</span><b>24</b></div><div class="l"><span>4 × 7</span><b>28</b></div><div class="l"><span>4 × 8</span><b>32</b></div><div class="l"><span>4 × 9</span><b>36</b></div><div class="l"><span>4 × 10</span><b>40</b></div></div><div class="t" style="--c:#E0A100"><h3>Table de 5</h3><div class="l"><span>5 × 1</span><b>5</b></div><div class="l"><span>5 × 2</span><b>10</b></div><div class="l"><span>5 × 3</span><b>15</b></div><div class="l"><span>5 × 4</span><b>20</b></div><div class="l"><span>5 × 5</span><b>25</b></div><div class="l"><span>5 × 6</span><b>30</b></div><div class="l"><span>5 × 7</span><b>35</b></div><div class="l"><span>5 × 8</span><b>40</b></div><div class="l"><span>5 × 9</span><b>45</b></div><div class="l"><span>5 × 10</span><b>50</b></div></div><div class="t" style="--c:#D84F7A"><h3>Table de 6</h3><div class="l"><span>6 × 1</span><b>6</b></div><div class="l"><span>6 × 2</span><b>12</b></div><div class="l"><span>6 × 3</span><b>18</b></div><div class="l"><span>6 × 4</span><b>24</b></div><div class="l"><span>6 × 5</span><b>30</b></div><div class="l"><span>6 × 6</span><b>36</b></div><div class="l"><span>6 × 7</span><b>42</b></div><div class="l"><span>6 × 8</span><b>48</b></div><div class="l"><span>6 × 9</span><b>54</b></div><div class="l"><span>6 × 10</span><b>60</b></div></div><div class="t" style="--c:#2E9B4F"><h3>Table de 7</h3><div class="l"><span>7 × 1</span><b>7</b></div><div class="l"><span>7 × 2</span><b>14</b></div><div class="l"><span>7 × 3</span><b>21</b></div><div class="l"><span>7 × 4</span><b>28</b></div><div class="l"><span>7 × 5</span><b>35</b></div><div class="l"><span>7 × 6</span><b>42</b></div><div class="l"><span>7 × 7</span><b>49</b></div><div class="l"><span>7 × 8</span><b>56</b></div><div class="l"><span>7 × 9</span><b>63</b></div><div class="l"><span>7 × 10</span><b>70</b></div></div><div class="t" style="--c:#C2571A"><h3>Table de 8</h3><div class="l"><span>8 × 1</span><b>8</b></div><div class="l"><span>8 × 2</span><b>16</b></div><div class="l"><span>8 × 3</span><b>24</b></div><div class="l"><span>8 × 4</span><b>32</b></div><div class="l"><span>8 × 5</span><b>40</b></div><div class="l"><span>8 × 6</span><b>48</b></div><div class="l"><span>8 × 7</span><b>56</b></div><div class="l"><span>8 × 8</span><b>64</b></div><div class="l"><span>8 × 9</span><b>72</b></div><div class="l"><span>8 × 10</span><b>80</b></div></div><div class="t" style="--c:#2B6CB0"><h3>Table de 9</h3><div class="l"><span>9 × 1</span><b>9</b></div><div class="l"><span>9 × 2</span><b>18</b></div><div class="l"><span>9 × 3</span><b>27</b></div><div class="l"><span>9 × 4</span><b>36</b></div><div class="l"><span>9 × 5</span><b>45</b></div><div class="l"><span>9 × 6</span><b>54</b></div><div class="l"><span>9 × 7</span><b>63</b></div><div class="l"><span>9 × 8</span><b>72</b></div><div class="l"><span>9 × 9</span><b>81</b></div><div class="l"><span>9 × 10</span><b>90</b></div></div>
+<div class="memo" style="grid-column:span 1;background:#EEF6F4;border-color:#0E8F80"><h3>À savoir</h3><ul>
+<li><b>a × b = b × a</b> : 7 × 8 = 8 × 7. Je n'ai donc que <b>la moitié</b> des résultats à retenir !</li>
+<li><b>× 1</b> : le nombre ne change pas.</li>
+<li><b>× 0</b> : ça fait toujours 0.</li>
+<li><b>× 10</b> : chaque chiffre avance d'un rang : 47 → 470.</li></ul></div>
+</div>
+<div class="memos">
+<div class="memo"><h3>Les astuces de calcul</h3><ul>
+<li><b>× 2</b> = le double : 8 × 2 = 8 + 8 = 16</li>
+<li><b>× 4</b> = le double du double : 7 → 14 → 28</li>
+<li><b>× 8</b> = encore un double : 6 → 12 → 24 → 48</li>
+<li><b>× 5</b> = × 10 puis la moitié : 8 × 5 = 80 ÷ 2 = 40</li>
+<li><b>× 9</b> = × 10 − le nombre : 7 × 9 = 70 − 7 = 63</li>
+<li><b>× 3</b> = le double + le nombre : 7 × 3 = 14 + 7 = 21</li>
+<li><b>× 6</b> = × 5 + le nombre : 7 × 6 = 35 + 7 = 42</li></ul></div>
+<div class="memo"><h3>Vérifier un résultat</h3><ul>
+<li><b>Table de 9</b> : les chiffres du résultat font toujours 9 (6 × 9 = 54 → 5 + 4 = 9). Les dizaines montent, les unités descendent.</li>
+<li><b>Table de 5</b> : le résultat finit par <b>0 ou 5</b>.</li>
+<li><b>Tables de 2, 4, 6, 8</b> : le résultat est toujours <b>pair</b>.</li>
+<li><b>Ordre de grandeur</b> : 7 × 8, c'est un peu moins que 7 × 10 = 70.</li>
+<li><b>Je décompose</b> : 7 × 12 = 7 × 10 + 7 × 2 = 70 + 14 = 84.</li></ul></div>
+<div class="memo hard"><h3>Les plus difficiles</h3><div class="k">
+<span><b>6 × 7 = 42</b></span><span><b>6 × 8 = 48</b></span>
+<span><b>7 × 7 = 49</b></span><span><b>7 × 8 = 56</b></span>
+<span><b>7 × 9 = 63</b></span><span><b>8 × 8 = 64</b></span>
+<span><b>8 × 9 = 72</b></span><span><b>6 × 9 = 54</b></span></div>
+<ul style="margin-top:1.2mm"><li><b>5, 6, 7, 8</b> : 56 = 7 × 8</li><li><b>1, 2, 3, 4</b> : 12 = 3 × 4</li><li>Les <b>carrés</b> : 6 × 6 = 36, 7 × 7 = 49, 8 × 8 = 64, 9 × 9 = 81</li></ul></div>
+</div>
+<div class="foot">Je m'entraîne aussi dans mon atelier : Tables → Défi chrono.</div>
+</div></body></html>
