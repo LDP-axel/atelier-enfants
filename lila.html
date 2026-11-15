@@ -1182,6 +1182,7 @@ function calcKey(v){
 
 /* ============ Modules ============ */
 const MEMO={
+ inv:`<h3>Les mots invariables</h3><p>Un mot <b>invariable</b> ne change jamais : pas de <b>s</b> au pluriel, pas de <b>e</b> au féminin. Il faut donc l’apprendre <b>par cœur</b>, une fois pour toutes.</p><p><b>Mes astuces :</b> beaucoup de mots en <b>-ment</b> et <b>-tant</b> / <b>-dant</b> (cependant, pendant, autant), des accents à retenir (<b>très, près, après, déjà, là</b>), et des mots collés ou séparés (<b>aujourd’hui</b>, <b>peut-être</b>, <b>parce que</b> en deux mots).</p><p><b>La liste (89 mots) :</b> alors, après, assez, aujourd’hui, auparavant, aussi, aussitôt, autant, autour, autrefois, avant, avec, beaucoup, bientôt, cependant, certes, chez, combien, comme, comment, d’abord, dans, davantage, dedans, dehors, déjà, demain, depuis, derrière, dessous, dessus, devant, donc, dont, durant, encore, enfin, ensemble, ensuite, entre, environ, exprès, hier, ici, jamais, jusque, loin, longtemps, lorsque, maintenant, malgré, mieux, moins, néanmoins, parce que, parfois, parmi, partout, pendant, peut-être, plusieurs, plutôt, pourquoi, pourtant, près, presque, puis, quand, quelquefois, sans, sauf, selon, seulement, sinon, soudain, sous, souvent, surtout, tant, tard, tôt, toujours, tout à coup, travers, très, trop, vers, vite, volontiers.</p><p>Méthode : je lis le mot, je le cache, je l’écris, je vérifie. 5 mots par jour suffisent !</p>`,
  r1789:`<h3>1789, l’année qui change tout</h3>
 <p><b>Avant 1789.</b> La France a un roi tout-puissant, <b>Louis XVI</b>. La société est divisée en <b>trois ordres</b> : le <b>clergé</b> (ceux qui prient), la <b>noblesse</b> (ceux qui combattent) et le <b>tiers état</b> (tous les autres, presque toute la population). Les deux premiers ont des <b>privilèges</b> : ils paient peu d'impôts. Le tiers état, lui, paie beaucoup… et le royaume n'a plus d'argent.</p>
 <p>📜 <b>5 mai 1789 · Les États généraux.</b> Le roi réunit à <b>Versailles</b> les députés des trois ordres pour trouver de l'argent. Les Français ont écrit leurs plaintes dans des <b>cahiers de doléances</b>. Problème : chaque ordre a une voix, donc le clergé et la noblesse gagnent toujours 2 contre 1.</p>
@@ -1398,6 +1399,114 @@ const R89VF=[
  ["L'abolition des privilèges a lieu après la Déclaration des droits de l'homme.",false,"<b>Faux.</b> Les privilèges sont abolis dans la nuit du <b>4 août</b>, la Déclaration est adoptée le <b>26 août</b>."],
  ["Les États généraux réunissent le clergé, la noblesse et le tiers état.",true,"<b>Vrai.</b> Ce sont les <b>trois ordres</b> de la société."],
 ];
+/* ============ MOTS INVARIABLES ============ */
+// [mot, fautes plausibles, phrase avec ___]
+const INV=[
+ ['alors',['alor','allors'],"Il pleuvait, ___ nous sommes restés à la maison."],
+ ['après',['aprés','aprè'],"On jouera ___ le goûter."],
+ ['assez',['asser','assé'],"Je n'ai pas ___ de temps pour finir."],
+ ['aujourd\'hui',['aujourdhui','aujour d\'hui'],"___, il fait très beau."],
+ ['auparavant',['au paravant','auparavent'],"Il faut ___ se laver les mains."],
+ ['aussi',['ausi','aussie'],"Moi ___, j'aime le chocolat."],
+ ['aussitôt',['aussitot','ausitôt'],"Dès qu'il est arrivé, il est ___ reparti."],
+ ['autant',['autent','otant'],"J'ai ___ de billes que toi."],
+ ['autour',['otour','autoure'],"Les enfants dansent ___ du feu."],
+ ['autrefois',['autre fois','otrefois'],"___, on s'éclairait à la bougie."],
+ ['avant',['avent','avan'],"Range ta chambre ___ de partir."],
+ ['avec',['avek','avecque'],"Je vais au parc ___ mon frère."],
+ ['beaucoup',['beaucou','baucoup'],"Il y a ___ de monde au marché."],
+ ['bientôt',['bientot','bien tôt'],"Les vacances arrivent ___."],
+ ['cependant',['cepandant','ce pendant'],"Il est fatigué, ___ il continue."],
+ ['certes',['certe','sertes'],"C'est difficile, ___, mais tu vas y arriver."],
+ ['chez',['ché','chés'],"Je dors ___ ma grand-mère ce soir."],
+ ['combien',['conbien','combiens'],"___ coûte ce livre ?"],
+ ['comme',['come','comm'],"Elle court ___ une gazelle."],
+ ['comment',['coment','commant'],"___ t'appelles-tu ?"],
+ ['d\'abord',['dabord','d\'abort'],"___, je fais mes devoirs, ensuite je joue."],
+ ['dans',['dant','dens'],"Le chat dort ___ son panier."],
+ ['davantage',['d\'avantage','davantages'],"Il faut travailler ___ pour progresser."],
+ ['dedans',['dedant','dedens'],"La boîte est vide, il n'y a rien ___."],
+ ['dehors',['dehor','déhors'],"Il fait beau, allons jouer ___."],
+ ['déjà',['déja','dejà'],"Tu as ___ fini ? Bravo !"],
+ ['demain',['demin','deumain'],"___, c'est mercredi."],
+ ['depuis',['depui','deupuis'],"J'apprends le piano ___ deux ans."],
+ ['derrière',['derière','dérrière'],"Le ballon a roulé ___ la haie."],
+ ['dessous',['dessou','desous'],"Le chat se cache ___ le lit."],
+ ['dessus',['dessu','desus'],"Pose le livre ___ la table."],
+ ['devant',['devent','devan'],"Attends-moi ___ l'école."],
+ ['donc',['donk','don'],"Je pense, ___ je suis."],
+ ['dont',['dond','dons'],"C'est le livre ___ je t'ai parlé."],
+ ['durant',['durent','durand'],"Il a plu ___ toute la nuit."],
+ ['encore',['encor','ancore'],"Je veux ___ un peu de gâteau."],
+ ['enfin',['enfain','anfin'],"Te voilà ___ !"],
+ ['ensemble',['ensembles','emsemble'],"Nous chantons tous ___."],
+ ['ensuite',['ensuitte','enssuite'],"Je me lave, ___ je m'habille."],
+ ['entre',['antre','entres'],"Le jardin se trouve ___ la maison et la route."],
+ ['environ',['environt','anviron'],"Il y a ___ trente élèves."],
+ ['exprès',['éxprès','expré'],"Il ne l'a pas fait ___."],
+ ['hier',['hièr','yer'],"___, nous sommes allés au cinéma."],
+ ['ici',['isi','icci'],"Viens ___ tout de suite !"],
+ ['jamais',['jamai','jammais'],"Je ne mange ___ d'épinards."],
+ ['jusque',['jusqu','jusques'],"Il a couru ___ là-bas."],
+ ['loin',['louin','loins'],"La mer est ___ d'ici."],
+ ['longtemps',['longtemp','lontemps'],"J'ai attendu ___ le bus."],
+ ['lorsque',['lors que','lorske'],"___ il pleut, je prends mon parapluie."],
+ ['maintenant',['maintenent','maintenan'],"Range tes affaires ___."],
+ ['malgré',['malgrés','mal gré'],"Il est sorti ___ la pluie."],
+ ['mieux',['mieu','mieus'],"Elle chante ___ que moi."],
+ ['moins',['moin','mouins'],"J'ai ___ de devoirs que toi."],
+ ['néanmoins',['néanmoin','néamoins'],"C'est difficile, ___ j'essaie."],
+ ['parce que',['par ce que','parceque'],"Je mets un pull ___ j'ai froid."],
+ ['parfois',['parfoi','par fois'],"Il est ___ en retard."],
+ ['parmi',['parmis','parmit'],"Choisis un livre ___ ceux-ci."],
+ ['partout',['par tout','partous'],"Il y a des jouets ___ dans la chambre."],
+ ['pendant',['pendent','pandant'],"Il a dormi ___ le film."],
+ ['peut-être',['peut être','peutêtre'],"Il viendra ___ demain."],
+ ['plusieurs',['plusieur','plusieures'],"J'ai lu ___ livres cet été."],
+ ['plutôt',['plutot','plus tôt'],"Je préfère ___ le jus d'orange."],
+ ['pourquoi',['pour quoi','pourquoit'],"___ pleures-tu ?"],
+ ['pourtant',['pourtent','pour tant'],"Il a perdu, ___ il était le favori."],
+ ['près',['prê','prés'],"J'habite ___ de l'école."],
+ ['presque',['presqu','prèsque'],"J'ai ___ fini mon dessin."],
+ ['puis',['puit','pui'],"Il a mangé, ___ il est parti."],
+ ['quand',['kan','quant'],"___ viendras-tu me voir ?"],
+ ['quelquefois',['quelque fois','quelquesfois'],"Je vais ___ à la piscine."],
+ ['sans',['san','sent'],"Il est parti ___ son manteau."],
+ ['sauf',['sof','saufe'],"Tout le monde est venu ___ Paul."],
+ ['selon',['ceulon','selont'],"___ la météo, il fera beau."],
+ ['seulement',['seulemant','seullement'],"Il reste ___ deux bonbons."],
+ ['sinon',['si non','sinont'],"Dépêche-toi, ___ tu vas rater le bus."],
+ ['soudain',['soudin','soudaint'],"___, l'orage éclata."],
+ ['sous',['sou','soue'],"Le chien dort ___ la table."],
+ ['souvent',['souvant','souven'],"Je vais ___ chez mes cousins."],
+ ['surtout',['sur tout','surtous'],"N'oublie ___ pas ton cartable !"],
+ ['tant',['tan','tent'],"Il a ___ mangé qu'il a mal au ventre."],
+ ['tard',['tar','tare'],"Il est ___, va te coucher."],
+ ['tôt',['tot','tôs'],"Je me lève ___ le matin."],
+ ['toujours',['toujour','tousjours'],"Il est ___ de bonne humeur."],
+ ['tout à coup',['tout à cou','tout-à-coup'],"___, le téléphone sonna."],
+ ['travers',['traver','traverts'],"Il regarde à ___ la fenêtre."],
+ ['très',['trés','trè'],"Ce gâteau est ___ bon."],
+ ['trop',['trot','tro'],"J'ai ___ mangé de bonbons."],
+ ['vers',['vèrs','vairs'],"Il marche ___ la gare."],
+ ['vite',['vitte','vit'],"Cours ___, le bus arrive !"],
+ ['volontiers',['volontier','vollontiers'],"Je viendrai ___ à ta fête."],
+];
+function sayFr(t){try{if(typeof speechSynthesis==='undefined')return;speechSynthesis.cancel();const vs=speechSynthesis.getVoices().filter(v=>/^fr[-_]/i.test(v.lang));
+  const u=new SpeechSynthesisUtterance(t);const v=vs.find(v=>/fr[-_]FR/i.test(v.lang))||vs[0];if(v){u.voice=v;u.lang=v.lang}else u.lang='fr-FR';u.rate=.8;speechSynthesis.speak(u)}catch(e){}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-say-fr]');if(b){e.preventDefault();e.stopPropagation();sayFr(b.dataset.sayFr)}},true);
+function genInv(){
+  const [w,bad,s]=pick(INV),r=Math.random(),full=s.replace('___',w);
+  const btn=t=>`<button class="btn" data-say-fr="${esc(t)}" style="margin:6px 0">🔊 Écouter</button>`;
+  if(r<.4)return {key:'invo'+w,type:'choice',kicker:'Mots invariables · Écoute',prompt:`<p>Écoute le mot et choisis la bonne orthographe.</p>${btn(w)}<p><i>${esc(s).replace('___','……')}</i></p>`,
+    options:shuffle([w,...bad]),answer:w,explain:`On écrit <b>${esc(w)}</b> : ${esc(full)}`};
+  if(r<.75)return {key:'invp'+w,type:'choice',kicker:'Mots invariables · Le mot qui manque',prompt:`<div class="big" style="font-size:1.3rem">${esc(s).replace('___','<b>____</b>')}</div><p>Quelle est la bonne orthographe ?</p>`,
+    options:shuffle([w,...bad]),answer:w,explain:`${esc(full)} C'est un mot invariable : il s'écrit toujours pareil.`};
+  const wrong=Math.random()<.5,shown=wrong?bad[0]:w;
+  return {key:'invv'+w,type:'choice',kicker:'Mots invariables · Bien écrit ?',prompt:`<div class="big" style="font-size:1.5rem">${esc(shown)}</div><p>Ce mot est-il bien écrit ?</p>`,
+    options:['Bien écrit','Mal écrit'],answer:wrong?'Mal écrit':'Bien écrit',explain:`On écrit <b>${esc(w)}</b>.`};
+}
+
 function genR1789(){
   const r=Math.random();
   if(r<.22){const ev=shuffle(R89).slice(0,4).map(e=>[e[0],e[2],null]);
@@ -1413,6 +1522,7 @@ function genR1789(){
 }
 
 const MODS=[
+ {id:'inv',sub:'fr',name:'Mots invariables',desc:'Écoute, phrases à trou et bien écrit ?',glyph:'très',gen:genInv},
  {id:'conj',sub:'fr',name:'Conjugaison',desc:'Présent, futur, imparfait, passé composé',glyph:'je…',gen:genConj},
  {id:'nature',sub:'fr',name:'Nature des mots',desc:'Nom, verbe, adjectif, adverbe…',glyph:'Aa',gen:genNature},
  {id:'phrase',sub:'fr',name:'Sujet & verbe',desc:'Sujet, verbe et compléments',glyph:'S·V',gen:genPhrase},
@@ -1432,6 +1542,7 @@ const MODS=[
  {id:'anglais',sub:'en',name:'Anglais',desc:'Mots, phrases et petite grammaire, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 const METHODS={
+ inv:"J'écoute le mot, je le relis dans la phrase, puis je regarde bien les pièges : un accent (très, après), une lettre muette (toujours, longtemps), un mot collé ou en deux morceaux (aujourd'hui, parce que).",
  r1789:"Je relis le récit dans l'onglet Cours. Pour la frise, je range par mois : mai, juin, juillet, puis les deux dates d'août (le 4 avant le 26). Pour chaque date, je me demande : qui agit (le roi, les députés, le peuple de Paris) et pour quoi faire.",
  volcans:"Je repère le mot clé (magma, lave, cratère…) et je me représente le volcan en coupe, du bas vers le haut : chambre → cheminée → cratère.",
  doubles:"Je décompose le nombre en dizaines et unités, je fais le double (ou la moitié) de chaque partie, puis j'additionne.",
