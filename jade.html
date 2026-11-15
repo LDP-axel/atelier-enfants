@@ -1182,6 +1182,8 @@ function calcKey(v){
 
 /* ============ Modules ============ */
 const MEMO={
+ digestion:`<h3>La digestion</h3><p><b>Le trajet des aliments (le tube digestif) :</b> la <b>bouche</b> → l’<b>œsophage</b> → l’<b>estomac</b> → l’<b>intestin grêle</b> → le <b>gros intestin</b> (côlon) → l’<b>anus</b>.</p><p>Autour, des organes qui aident : les <b>glandes salivaires</b> (la salive), le <b>foie</b> (la bile) et le <b>pancréas</b> (les sucs pancréatiques). Les aliments ne passent pas dedans.</p><p><b>Ce qu’il faut retenir :</b> dans le corps, les aliments deviennent des <b>nutriments</b> grâce à une transformation <b>chimique</b>.</p><p>• Dans l’<b>estomac</b>, grâce aux <b>sucs gastriques</b>.<br>• Dans l’<b>intestin grêle</b>, grâce aux <b>sucs pancréatiques</b> et à la <b>bile</b>, déversés par le pancréas et le foie.</p><p>Les nutriments traversent la <b>paroi de l’intestin grêle</b> pour aller <b>nourrir</b> les autres organes. Les <b>déchets</b> qui restent sont évacués par l’<b>anus</b> sous forme d’<b>excréments</b>.</p>`,
+ rhone:`<h3>Le Rhône, un fleuve puissant</h3><p>Un <b>fleuve</b> est un cours d’eau qui, avec ses <b>affluents</b>, aboutit à la <b>mer</b>.</p><p><b>Son voyage :</b> il naît au <b>glacier de la Furka</b> (massif du Saint-Gothard, Alpes <b>suisses</b>), traverse le <b>lac Léman</b> et <b>Genève</b>, puis le massif du <b>Jura</b>. À <b>Lyon</b>, il reçoit la <b>Saône</b>. À <b>Arles</b>, il se divise en <b>2 bras</b> et forme un <b>delta</b> (la Camargue), puis se jette dans la <b>mer Méditerranée</b>.</p><p><b>Les chiffres :</b> <b>812 km</b> au total, dont <b>545 km</b> en France. Affluents cités : l’Isère, la Saône, la Durance, la Drôme.</p><p><b>Les 5 grands fleuves français :</b> la Loire (1 012 km, le plus long), la Seine (776 km), le Rhône (le plus <b>puissant</b>), la Garonne, le Rhin.</p><p><b>Un fleuve capricieux :</b> son débit varie entre 1 500 et 10 000 m³ par seconde, ce qui provoque des <b>crues</b> dévastatrices.</p><p><b>Une voie de passage :</b> la vallée du Rhône relie l’Europe du Nord et du Sud, Lyon et Marseille (routes, voies ferrées, autoroute).</p>`,
  inv:`<h3>Les mots invariables</h3><p>Un mot <b>invariable</b> ne change jamais : pas de <b>s</b> au pluriel, pas de <b>e</b> au féminin. Il faut donc l’apprendre <b>par cœur</b>, une fois pour toutes.</p><p><b>Mes astuces :</b> beaucoup de mots en <b>-ment</b> et <b>-tant</b> / <b>-dant</b> (cependant, pendant, autant), des accents à retenir (<b>très, près, après, déjà, là</b>), et des mots collés ou séparés (<b>aujourd’hui</b>, <b>peut-être</b>, <b>parce que</b> en deux mots).</p><p><b>La liste de la classe (103 mots) :</b> afin, ailleurs, ainsi, alors, après, assez, à travers, aujourd’hui, auparavant, auprès, aussi, aussitôt, autant, autour, autrefois, autrement, avant, beaucoup, bientôt, ceci, cela, ça, cependant, certes, c’est-à-dire, chaque, chez, combien, comme, comment, d’abord, d’accord, davantage, debout, dehors, déjà, demain, depuis, derrière, désormais, devant, dont, dorénavant, durant, encore, en effet, enfin, ensuite, entre, envers, environ, exprès, fois, guère, hélas, hier, ici, jamais, jusqu’à, là, là-bas, longtemps, lorsque, maintenant, mais, mieux, moins, néanmoins, parce que, parfois, parmi, partout, pendant, personne, peu, peut-être, plusieurs, plutôt, pourquoi, pourtant, près, presque, puis, quand, quelquefois, quoique, seulement, sitôt, soudain, souvent, surtout, tant mieux, tant pis, tôt, tard, toujours, tout à coup, tout à fait, très, trop, vers, volontiers, vraiment.</p><p>Méthode : je lis le mot, je le cache, je l’écris, je vérifie. 5 mots par jour suffisent !</p>`,
  r1789:`<h3>1789, l’année qui change tout</h3>
 <p><b>Avant 1789.</b> La France a un roi tout-puissant, <b>Louis XVI</b>. La société est divisée en <b>trois ordres</b> : le <b>clergé</b> (ceux qui prient), la <b>noblesse</b> (ceux qui combattent) et le <b>tiers état</b> (tous les autres, presque toute la population). Les deux premiers ont des <b>privilèges</b> : ils paient peu d'impôts. Le tiers état, lui, paie beaucoup… et le royaume n'a plus d'argent.</p>
@@ -1521,6 +1523,65 @@ function genInv(){
     options:['Bien écrit','Mal écrit'],answer:wrong?'Mal écrit':'Bien écrit',explain:`On écrit <b>${esc(w)}</b>.`};
 }
 
+/* ============ LEÇONS DE JADE : DIGESTION + RHÔNE ============ */
+const DIG_ORD=[[1,'la bouche'],[2,'l\'œsophage'],[3,'l\'estomac'],[4,'l\'intestin grêle'],[5,'le gros intestin (côlon)'],[6,'l\'anus']];
+const DIGQ=[
+ ["Par où les aliments entrent-ils dans le corps ?","la bouche",["l'estomac","le foie","l'œsophage"],"Les aliments partent de la <b>bouche</b>, où on les mâche et où ils se mélangent à la salive."],
+ ["Que fabriquent les glandes salivaires ?","la salive",["la bile","les sucs gastriques","le sang"],"Les <b>glandes salivaires</b> fabriquent la <b>salive</b>, qui mouille les aliments dans la bouche."],
+ ["Quel tuyau relie la bouche à l'estomac ?","l'œsophage",["l'intestin grêle","le gros intestin","l'anus"],"L'<b>œsophage</b> descend de la bouche jusqu'à l'estomac."],
+ ["Comment s'appelle le long trajet des aliments, de la bouche à l'anus ?","le tube digestif",["le système nerveux","la circulation sanguine","la respiration"],"Les aliments passent dans le <b>tube digestif</b> : bouche, œsophage, estomac, intestin grêle, gros intestin, anus."],
+ ["Que deviennent les aliments pendant la digestion ?","des nutriments",["des muscles","de l'air","des os"],"Les aliments deviennent des <b>nutriments</b> grâce à une transformation <b>chimique</b>."],
+ ["Quel type de transformation subissent les aliments pour devenir des nutriments ?","une transformation chimique",["une transformation magique","une transformation électrique","aucune transformation"],"C'est une transformation <b>chimique</b>, grâce aux sucs digestifs."],
+ ["Grâce à quoi les aliments sont-ils transformés dans l'estomac ?","les sucs gastriques",["la bile","la salive seulement","l'air"],"Dans l'<b>estomac</b>, ce sont les <b>sucs gastriques</b>."],
+ ["Grâce à quoi les aliments sont-ils transformés dans l'intestin grêle ?","les sucs pancréatiques et la bile",["les sucs gastriques","la salive","le sang"],"Dans l'<b>intestin grêle</b> : les <b>sucs pancréatiques</b> (du pancréas) et la <b>bile</b> (du foie)."],
+ ["Quel organe fabrique la bile ?","le foie",["le pancréas","l'estomac","le cœur"],"La <b>bile</b> est fabriquée par le <b>foie</b>."],
+ ["Quel organe fabrique les sucs pancréatiques ?","le pancréas",["le foie","l'œsophage","les poumons"],"Les <b>sucs pancréatiques</b> viennent du <b>pancréas</b>."],
+ ["Où les nutriments passent-ils dans le sang pour nourrir le corps ?","à travers la paroi de l'intestin grêle",["à travers la peau","dans la bouche","dans l'anus"],"Les nutriments traversent la <b>paroi de l'intestin grêle</b> pour aller nourrir les autres organes."],
+ ["À quoi servent les nutriments ?","à nourrir les organes du corps",["à fabriquer des excréments","à respirer","à rien"],"Les nutriments vont <b>nourrir</b> tous les organes du corps."],
+ ["Que deviennent les déchets de la digestion ?","ils sont évacués par l'anus sous forme d'excréments",["ils restent dans l'estomac","ils sortent par la bouche","ils vont dans les poumons"],"Les <b>déchets</b> sont évacués par l'<b>anus</b> sous forme d'<b>excréments</b>."],
+ ["Quel organe vient juste après l'estomac ?","l'intestin grêle",["l'œsophage","la bouche","l'anus"],"Bouche → œsophage → estomac → <b>intestin grêle</b> → gros intestin → anus."],
+ ["Quel autre nom donne-t-on au gros intestin ?","le côlon",["le pancréas","l'œsophage","le foie"],"Le gros intestin s'appelle aussi le <b>côlon</b>."],
+ ["Le foie et le pancréas font-ils partie du tube digestif (les aliments passent-ils dedans) ?","non, ils versent leurs sucs dans l'intestin grêle",["oui, les aliments passent dedans","oui, c'est là que finit la digestion","non, ils servent à respirer"],"Les aliments ne passent pas dans le foie ni le pancréas : ils <b>déversent</b> la bile et les sucs pancréatiques dans l'intestin grêle."],
+];
+function genDigestion(){
+  if(Math.random()<.25){const ev=shuffle(DIG_ORD).slice(0,4).map(e=>[e[0],e[1],null]);
+    return {key:'digo'+ev.map(e=>e[0]).join(),type:'order',kicker:'La digestion · Le trajet',prompt:'Range ces organes dans l\'ordre du <b>trajet des aliments</b>.',events:ev,
+      explain:'Le trajet : '+DIG_ORD.map(e=>e[1]).join(' → ')};}
+  return genQCM(DIGQ,'La digestion','digq');
+}
+const RHONEQ=[
+ ["Qu'est-ce qu'un fleuve ?","un cours d'eau qui, avec ses affluents, aboutit à la mer",["un cours d'eau qui se jette dans une rivière","un grand lac","une mer intérieure"],"Un <b>fleuve</b> est un cours d'eau qui, avec ses <b>affluents</b>, aboutit à la <b>mer</b>."],
+ ["Qu'est-ce qu'un affluent ?","une rivière qui se jette dans un fleuve",["la source d'un fleuve","l'embouchure d'un fleuve","un barrage"],"Un <b>affluent</b> est une rivière qui se jette dans un fleuve. La Saône est un affluent du Rhône."],
+ ["Où le Rhône prend-il sa source ?","au glacier de la Furka, dans les Alpes suisses",["dans le Massif central","à Lyon","dans les Pyrénées"],"Le Rhône naît au <b>glacier de la Furka</b>, dans le <b>massif du Saint-Gothard</b>, en <b>Suisse</b>."],
+ ["Dans quel lac le Rhône passe-t-il en Suisse ?","le lac Léman",["le lac d'Annecy","le lac du Bourget","le lac de Serre-Ponçon"],"Le Rhône traverse le <b>lac Léman</b>, puis la ville de <b>Genève</b>."],
+ ["Quelle est la longueur totale du Rhône ?","812 km",["1 200 km","545 km","1 012 km"],"Le Rhône mesure <b>812 km</b> en tout, dont <b>545 km</b> en France."],
+ ["Combien de kilomètres le Rhône parcourt-il en France ?","545 km",["812 km","1 012 km","188 km"],"<b>545 km</b> en France (812 km au total)."],
+ ["Dans quelle mer le Rhône se jette-t-il ?","la mer Méditerranée",["la Manche","l'océan Atlantique","la mer du Nord"],"Le Rhône se jette dans la <b>mer Méditerranée</b>."],
+ ["Quelle rivière rejoint le Rhône à Lyon ?","la Saône",["la Seine","la Loire","la Garonne"],"À <b>Lyon</b>, le Rhône reçoit la <b>Saône</b>."],
+ ["Que se passe-t-il à Arles ?","le Rhône se divise en 2 bras et forme un delta",["le Rhône prend sa source","le Rhône rejoint la Loire","le Rhône s'arrête"],"À <b>Arles</b>, le Rhône se divise en <b>2 bras</b> : c'est un <b>delta</b>, qui entoure la <b>Camargue</b>."],
+ ["Comment s'appelle la région entre les 2 bras du Rhône ?","la Camargue",["la Bretagne","l'Alsace","la Beauce"],"Entre les deux bras du delta se trouve la <b>Camargue</b>."],
+ ["Quel est le plus puissant des 5 grands fleuves français ?","le Rhône",["la Loire","la Seine","la Garonne"],"Le <b>Rhône</b> est le plus <b>puissant</b> : il a le plus fort débit."],
+ ["Quel est le plus long fleuve français ?","la Loire",["le Rhône","la Seine","la Garonne"],"La <b>Loire</b> (1 012 km) est le plus long fleuve de France. Le Rhône est le plus puissant, pas le plus long."],
+ ["Quels sont les 5 grands fleuves français ?","la Loire, la Seine, le Rhône, la Garonne et le Rhin",["la Loire, la Saône, l'Isère, la Durance et le Rhin","la Seine, la Marne, l'Oise, l'Yonne et l'Aube","le Rhône, le Nil, la Loire, l'Amazone et la Seine"],"<b>Loire</b>, <b>Seine</b>, <b>Rhône</b>, <b>Garonne</b> et <b>Rhin</b>."],
+ ["Laquelle de ces rivières est un affluent du Rhône cité dans la leçon ?","la Durance",["la Marne","la Dordogne","l'Oise"],"Les affluents cités : l'<b>Isère</b>, la <b>Saône</b>, la <b>Durance</b> et la <b>Drôme</b>."],
+ ["Pourquoi dit-on que le Rhône est un fleuve capricieux ?","son débit varie beaucoup, ce qui provoque des crues",["il change de source chaque année","il coule parfois vers le nord","il gèle tous les hivers"],"Son <b>débit</b> varie entre <b>1 500 et 10 000 m³ par seconde</b> : cela entraîne des <b>crues</b> dévastatrices."],
+ ["Que relie la vallée du Rhône ?","l'Europe du Nord et l'Europe du Sud (Lyon et Marseille)",["la France et l'Espagne","la Bretagne et l'Alsace","Paris et Bordeaux"],"La vallée du Rhône est une grande <b>voie de passage</b> : elle relie Paris, <b>Lyon</b> et <b>Marseille</b>, avec des routes, des voies ferrées et une autoroute."],
+ ["Qu'est-ce qu'une crue ?","une montée des eaux du fleuve",["un fleuve qui s'assèche","une source glacée","un pont sur un fleuve"],"Une <b>crue</b>, c'est quand le niveau de l'eau monte fortement : le fleuve peut déborder."],
+];
+const RHONEVF=[
+ ["Le Rhône est le plus long fleuve français.",false,"<b>Faux.</b> C'est la <b>Loire</b>. Le Rhône est le plus <b>puissant</b>."],
+ ["Le Rhône prend sa source en Suisse.",true,"<b>Vrai.</b> Au glacier de la Furka, dans les Alpes suisses."],
+ ["La vallée du Rhône relie Lyon et Marseille.",true,"<b>Vrai.</b> C'est une grande voie de passage."],
+ ["Le Rhône connaît des crues dévastatrices.",true,"<b>Vrai.</b> Son débit varie beaucoup : c'est un fleuve capricieux."],
+ ["Le Rhône se jette dans l'océan Atlantique.",false,"<b>Faux.</b> Il se jette dans la <b>mer Méditerranée</b>."],
+ ["L'Ardèche est un affluent cité dans la leçon.",false,"<b>Faux.</b> La leçon cite l'Isère, la Saône, la Durance et la Drôme."],
+ ["À Arles, le Rhône se divise en 2 bras.",true,"<b>Vrai.</b> Il forme un delta autour de la Camargue."],
+];
+function genRhone(){
+  if(Math.random()<.3){const [s,v,e]=pick(RHONEVF);return {key:'rhv'+s,type:'choice',kicker:'Le Rhône · Vrai ou faux ?',prompt:`<div class="big" style="font-size:1.35rem">${esc(s)}</div>`,options:['Vrai','Faux'],answer:v?'Vrai':'Faux',explain:e};}
+  return genQCM(RHONEQ,'Le Rhône','rhq');
+}
+
 function genR1789(){
   const r=Math.random();
   if(r<.22){const ev=shuffle(R89).slice(0,4).map(e=>[e[0],e[2],null]);
@@ -1550,12 +1611,16 @@ const MODS=[
  {id:'histoire',sub:'mo',name:'Histoire',desc:'De 1789 à nos jours, frise chronologique',glyph:'1789',gen:genHist},
  {id:'geo',sub:'mo',name:'Géographie',desc:'France, Europe, monde, se déplacer, habiter',glyph:'N↑',gen:genGeo},
  {id:'cartes',sub:'mo',name:'Cartes',desc:'Explore et touche la carte de France et du monde',glyph:'◎',gen:genCarte},
+ {id:'digestion',sub:'mo',name:'La digestion',desc:'Le trajet des aliments et les organes',glyph:'🍎',gen:genDigestion},
+ {id:'rhone',sub:'mo',name:'Le Rhône',desc:'Source, affluents, delta, crues',glyph:'🌊',gen:genRhone},
  {id:'r1789',sub:'mo',name:'1789, l’année qui change tout',desc:'5 dates, une frise, un quiz et des vrai ou faux',glyph:'🇫🇷',gen:genR1789},
  {id:'volcans',sub:'mo',name:'Les volcans',desc:'Éruptions, lave, magma, séismes',glyph:'🌋',gen:()=>genQCM(VOLC,'Les volcans','v')},
  {id:'corps',sub:'mo',name:'Le corps humain',desc:'Os, muscles, organes, les sens',glyph:'♥',gen:genAnat},
  {id:'anglais',sub:'en',name:'Anglais',desc:'Mots, phrases et petite grammaire, avec écoute',glyph:'Hi!',gen:genEn},
 ];
 const METHODS={
+ digestion:"Je suis le chemin d'une bouchée de pomme : bouche, œsophage, estomac, intestin grêle, gros intestin, anus. Je me rappelle que le foie et le pancréas sont à côté et envoient leurs sucs.",
+ rhone:"Je suis le Rhône de sa source à la mer : Suisse (Furka, Léman, Genève), Lyon (la Saône), Arles (2 bras, delta), Méditerranée.",
  inv:"J'écoute le mot, je le relis dans la phrase, puis je regarde bien les pièges : un accent (très, après), une lettre muette (toujours, longtemps), un mot collé ou en deux morceaux (aujourd'hui, parce que).",
  r1789:"Je relis le récit dans l'onglet Cours. Pour la frise, je range par mois : mai, juin, juillet, puis les deux dates d'août (le 4 avant le 26). Pour chaque date, je me demande : qui agit (le roi, les députés, le peuple de Paris) et pour quoi faire.",
  volcans:"Je repère le mot clé (magma, lave, cratère…) et je me représente le volcan en coupe, du bas vers le haut : chambre → cheminée → cratère.",
